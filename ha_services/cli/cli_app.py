@@ -159,7 +159,7 @@ cli.add_command(publish_loop)
 
 
 def main():
-    print(f'[bold][green]ha_services[/green] DEMO cli v[cyan]{__version__}')
+    print(f'[bold][green]ha-services[/green] DEMO cli v[cyan]{__version__}')
 
     # Execute Click CLI:
     cli.name = './cli.py'

@@ -1,5 +1,5 @@
 [project]
-name = "ha_services"
+name = "ha-services"
 dynamic = ["version"]
 description = "Helpers to send periodic information via MQTT to Home Assistant"
 license = {text = "GPL-3.0-or-later"}

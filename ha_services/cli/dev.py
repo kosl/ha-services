@@ -168,7 +168,7 @@ def publish():
     publish_package(
         module=ha_services,
         package_path=PACKAGE_ROOT,
-        distribution_name='ha_services-connect',
+        distribution_name='ha-services',
     )
 
 
