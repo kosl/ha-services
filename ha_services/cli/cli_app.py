@@ -8,14 +8,15 @@ from pathlib import Path
 import rich_click as click
 from bx_py_utils.path import assert_is_file
 from rich import print  # noqa
-from rich.pretty import pprint
 from rich_click import RichGroup
 
 import ha_services
 from ha_services import __version__, constants
-from ha_services.example import DemoSettings
+from ha_services.example import DemoSettings, publish_forever
 from ha_services.log_setup import basic_log_setup
-from ha_services.toml_settings.api import debug_print_user_settings, edit_user_settings
+from ha_services.mqtt4homeassistant.data_classes import MqttSettings
+from ha_services.mqtt4homeassistant.mqtt import get_connected_client
+from ha_services.toml_settings.api import debug_print_user_settings, edit_user_settings, get_user_settings
 from ha_services.toml_settings.exceptions import UserSettingsNotFound
 
 
@@ -110,7 +111,15 @@ def test_mqtt_connection(debug):
     Test connection to MQTT Server
     """
     basic_log_setup(debug=debug)
-    settings: MqttSettings = get_mqtt_settings()
+    try:
+        user_settings: DemoSettings = get_user_settings(
+            user_settings=DemoSettings(), settings_path=SETTINGS_PATH, debug=True
+        )
+    except UserSettingsNotFound as err:
+        print(f'[yellow]No settings created yet[/yellow]: {err} [green](Hint: call "edit-settings" first!)')
+        return
+
+    settings: MqttSettings = user_settings.mqtt
     mqttc = get_connected_client(settings=settings, verbose=True)
     mqttc.loop_start()
     mqttc.loop_stop()
@@ -122,25 +131,23 @@ cli.add_command(test_mqtt_connection)
 
 
 @click.command()
-@click.option('--log/--no-log', **OPTION_ARGS_DEFAULT_TRUE)
 @click.option('--verbose/--no-verbose', **OPTION_ARGS_DEFAULT_TRUE)
 @click.option('--debug/--no-debug', **OPTION_ARGS_DEFAULT_FALSE)
-def publish_loop(ip, port, inverter, log, verbose, debug):
+def publish_loop(verbose, debug):
     """
-    Publish current data via MQTT for Home Assistant (endless loop)
-
-    The "Daily Production" count will be cleared in the night,
-    by set the current date time via AT-command.
+    Publish data via MQTT for Home Assistant (endless loop)
     """
-    if log:
-        basic_log_setup(debug=debug)
-
-    config = Config(inverter_name=inverter, host=ip, port=port, verbose=verbose, debug=debug)
-
-    mqtt_settings: MqttSettings = get_mqtt_settings()
-    pprint(mqtt_settings.anonymized())
+    basic_log_setup(debug=debug)
     try:
-        publish_forever(mqtt_settings=mqtt_settings, config=config, verbose=verbose)
+        user_settings: DemoSettings = get_user_settings(
+            user_settings=DemoSettings(), settings_path=SETTINGS_PATH, debug=True
+        )
+    except UserSettingsNotFound as err:
+        print(f'[yellow]No settings created yet[/yellow]: {err} [green](Hint: call "edit-settings" first!)')
+        return
+
+    try:
+        publish_forever(user_settings=user_settings, verbose=verbose)
     except KeyboardInterrupt:
         print('Bye, bye')
 
