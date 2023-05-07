@@ -90,9 +90,7 @@ class HaMqttPublisher:
             print(f'[yellow]Publish MQTT topic: [blue]{topic} [grey](Send count: {self.send_count})')
             pprint(payload)
 
-        assert self.mqttc.is_connected(), 'Not connected to MQTT broker!'
-        info = self.mqttc.publish(topic=topic, payload=json.dumps(payload))
-
+        info: mqtt.MQTTMessageInfo = self.mqttc.publish(topic=topic, payload=json.dumps(payload))
         if self.verbose:
             print('publish result:', info)
 
