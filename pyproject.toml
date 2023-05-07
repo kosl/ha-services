@@ -9,6 +9,9 @@ authors = [
 ]
 requires-python = ">=3.9,<4"
 dependencies = [
+    "paho-mqtt",  # https://pypi.org/project/paho-mqtt/
+    "tomlkit",  # https://github.com/sdispater/tomlkit
+    "msgspec",  # https://github.com/jcrist/msgspec
     "bx_py_utils",  # https://github.com/boxine/bx_py_utils
     "click",  # https://github.com/pallets/click/
     "rich-click",  # https://github.com/ewels/rich-click

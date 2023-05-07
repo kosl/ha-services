@@ -8,10 +8,15 @@ from pathlib import Path
 import rich_click as click
 from bx_py_utils.path import assert_is_file
 from rich import print  # noqa
+from rich.pretty import pprint
 from rich_click import RichGroup
 
 import ha_services
-from ha_services import constants, __version__
+from ha_services import __version__, constants
+from ha_services.example import DemoSettings
+from ha_services.log_setup import basic_log_setup
+from ha_services.toml_settings.api import debug_print_user_settings, edit_user_settings
+from ha_services.toml_settings.exceptions import UserSettingsNotFound
 
 
 logger = logging.getLogger(__name__)
@@ -64,8 +69,90 @@ def version():
 cli.add_command(version)
 
 
+######################################################################################################
+
+SETTINGS_PATH = '~/.ha_services_example.toml'
+
+
+@click.command()
+@click.option('--debug/--no-debug', **OPTION_ARGS_DEFAULT_TRUE)
+def edit_settings(debug):
+    """
+    Edit the settings file. On first call: Create the default one.
+    """
+    basic_log_setup(debug=debug)
+    edit_user_settings(user_settings=DemoSettings(), settings_path=SETTINGS_PATH)
+
+
+cli.add_command(edit_settings)
+
+
+@click.command()
+@click.option('--debug/--no-debug', **OPTION_ARGS_DEFAULT_TRUE)
+def debug_settings(debug):
+    """
+    Display (anonymized) MQTT server username and password
+    """
+    basic_log_setup(debug=debug)
+    try:
+        debug_print_user_settings(user_settings=DemoSettings(), settings_path=SETTINGS_PATH)
+    except UserSettingsNotFound as err:
+        print(f'[yellow]No settings created yet[/yellow]: {err} [green](Hint: call "edit-settings" first!)')
+
+
+cli.add_command(debug_settings)
+
+
+@click.command()
+@click.option('--debug/--no-debug', **OPTION_ARGS_DEFAULT_FALSE)
+def test_mqtt_connection(debug):
+    """
+    Test connection to MQTT Server
+    """
+    basic_log_setup(debug=debug)
+    settings: MqttSettings = get_mqtt_settings()
+    mqttc = get_connected_client(settings=settings, verbose=True)
+    mqttc.loop_start()
+    mqttc.loop_stop()
+    mqttc.disconnect()
+    print('\n[green]Test succeed[/green], bye ;)')
+
+
+cli.add_command(test_mqtt_connection)
+
+
+@click.command()
+@click.option('--log/--no-log', **OPTION_ARGS_DEFAULT_TRUE)
+@click.option('--verbose/--no-verbose', **OPTION_ARGS_DEFAULT_TRUE)
+@click.option('--debug/--no-debug', **OPTION_ARGS_DEFAULT_FALSE)
+def publish_loop(ip, port, inverter, log, verbose, debug):
+    """
+    Publish current data via MQTT for Home Assistant (endless loop)
+
+    The "Daily Production" count will be cleared in the night,
+    by set the current date time via AT-command.
+    """
+    if log:
+        basic_log_setup(debug=debug)
+
+    config = Config(inverter_name=inverter, host=ip, port=port, verbose=verbose, debug=debug)
+
+    mqtt_settings: MqttSettings = get_mqtt_settings()
+    pprint(mqtt_settings.anonymized())
+    try:
+        publish_forever(mqtt_settings=mqtt_settings, config=config, verbose=verbose)
+    except KeyboardInterrupt:
+        print('Bye, bye')
+
+
+cli.add_command(publish_loop)
+
+
+######################################################################################################
+
+
 def main():
-    print(f'[bold][green]ha_services[/green] v[cyan]{__version__}')
+    print(f'[bold][green]ha_services[/green] DEMO cli v[cyan]{__version__}')
 
     # Execute Click CLI:
     cli.name = './cli.py'
