@@ -13,6 +13,7 @@ from ha_services.toml_settings.debug import print_dataclasses
 from ha_services.toml_settings.deserialize import toml2dataclass
 from ha_services.toml_settings.exceptions import UserSettingsNotFound
 from ha_services.toml_settings.path_utils import backup, clean_settings_path
+from ha_services.toml_settings.sensible_editor import open_editor_for
 from ha_services.toml_settings.serialize import dataclass2toml
 
 
@@ -27,13 +28,7 @@ def edit_user_settings(*, user_settings: dataclasses, settings_path: str) -> Non
         doc_str = tomlkit.dumps(document, sort_keys=False)
         settings_path.write_text(doc_str, encoding='UTF-8')
 
-    logger.info('Open settings file: "%s"', settings_path)
-    open_bin = shutil.which('open')
-    if not open_bin:
-        raise FileNotFoundError('File "open" not found!\nPlease open manually settings file: "{settings_path}"')
-
-    logger.debug('Call: %s %s', open_bin, settings_path)
-    subprocess.check_call([open_bin, settings_path])
+    open_editor_for(settings_path)
 
 
 def get_user_settings(*, user_settings: dataclasses, settings_path: str, debug: bool = False) -> dataclasses:
