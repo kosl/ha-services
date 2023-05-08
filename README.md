@@ -7,3 +7,5 @@
 [![License GPL-3.0-or-later](https://img.shields.io/pypi/l/ha_services)](https://github.com/jedie/ha_services/blob/main/LICENSE)
 
 Helpers to send periodic information via MQTT to Home Assistant
+
+* https://pypi.org/project/ha-services/
