@@ -1,5 +1,6 @@
 import dataclasses
 import logging
+import sys
 from collections.abc import Iterable
 
 import tomlkit
@@ -18,7 +19,7 @@ from ha_services.toml_settings.serialize import dataclass2toml
 logger = logging.getLogger(__name__)
 
 
-def edit_user_settings(*, user_settings: dataclasses, settings_path: str) -> None:
+def edit_user_settings(*, user_settings, settings_path: str) -> None:
     settings_path = clean_settings_path(settings_path)
     if not settings_path.is_file():
         logger.info('Settings file "%s" not exist -> create default', settings_path)
@@ -29,7 +30,7 @@ def edit_user_settings(*, user_settings: dataclasses, settings_path: str) -> Non
     open_editor_for(settings_path)
 
 
-def get_user_settings(*, user_settings: dataclasses, settings_path: str, debug: bool = False) -> dataclasses:
+def get_user_settings(*, user_settings, settings_path: str, debug: bool = False) -> dataclasses:
     settings_path = clean_settings_path(settings_path)
     if debug:
         print(f'Use user settings file: {settings_path}')
@@ -50,13 +51,22 @@ def get_user_settings(*, user_settings: dataclasses, settings_path: str, debug: 
     return user_settings
 
 
+def get_user_settings_or_exit(*, user_settings, settings_path: str) -> dataclasses:
+    try:
+        user_settings = get_user_settings(user_settings=user_settings, settings_path=settings_path, debug=True)
+    except UserSettingsNotFound as err:
+        print(f'[yellow]No settings created yet[/yellow]: {err} [green](Hint: call "edit-settings" first!)')
+        sys.exit(1)
+    return user_settings
+
+
 def debug_print_user_settings(
-    *, user_settings: dataclasses, settings_path: str, anonymize_keys: Iterable = ('password', 'email')
+    *, user_settings, settings_path: str, anonymize_keys: Iterable = ('password', 'email')
 ) -> None:
     user_settings = get_user_settings(user_settings=user_settings, settings_path=settings_path, debug=True)
 
     print()
     console = Console()
-    console.rule('user settings')
+    console.rule(f'User settings: {settings_path}')
     print_dataclasses(instance=user_settings, anonymize_keys=anonymize_keys)
     console.rule()
