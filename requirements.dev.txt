@@ -459,7 +459,7 @@ more-itertools==9.1.0 \
     --hash=sha256:cabaa341ad0389ea83c17a94566a53ae4c9d07349861ecb14dc6d0345cf9ac5d \
     --hash=sha256:d2bc7f02446e86a68911e58ded76d6561eea00cddfb2a91e7019bbb586c799f3
     # via jaraco-classes
-msgspec[toml]==0.14.2 \
+msgspec==0.14.2 \
     --hash=sha256:03ddc8c518afbea4fb89afb587d77f11d00909f003966d437f31fb8fffdfac28 \
     --hash=sha256:1c8f7e631fad9d5a33fcfb0f2a27eb86dc0390e91d6b51c95a604b7ccbc264f1 \
     --hash=sha256:1fc99f0929fa91cc53fa35f59be366d67f116c2b7f0f3b29dc60e3179f6fb205 \
@@ -758,15 +758,10 @@ tomli==2.0.1 \
     #   build
     #   flynt
     #   ha-services (pyproject.toml)
-    #   msgspec
     #   mypy
     #   pyproject-api
     #   pyproject-hooks
     #   tox
-tomli-w==1.0.0 \
-    --hash=sha256:9f2a07e8be30a0729e533ec968016807069991ae2fd921a78d42f429ae5f4463 \
-    --hash=sha256:f463434305e0336248cac9c2dc8076b707d8a12d019dd349f5c1e382dd1ae1b9
-    # via msgspec
 tomlkit==0.11.8 \
     --hash=sha256:8c726c4c202bdb148667835f68d68780b9a003a9ec34167b6c673b38eff2a171 \
     --hash=sha256:9330fc7faa1db67b541b28e62018c17d20be733177d290a13b24c62d1614e0c3

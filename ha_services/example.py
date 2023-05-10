@@ -9,6 +9,7 @@ from rich import print  # noqa
 from ha_services.mqtt4homeassistant.converter import values2mqtt_payload
 from ha_services.mqtt4homeassistant.data_classes import HaValue, HaValues, MqttSettings
 from ha_services.mqtt4homeassistant.mqtt import HaMqttPublisher
+from ha_services.systemd.data_classes import SystemdServiceInfo
 
 
 logger = logging.getLogger(__name__)
@@ -34,6 +35,7 @@ class DemoSettings:
 
     mqtt: dataclasses = dataclasses.field(default_factory=MqttSettings)
     app: dataclasses = dataclasses.field(default_factory=MqttExampleValues)
+    systemd: dataclasses = dataclasses.field(default_factory=SystemdServiceInfo)
 
 
 def publish_forever(*, user_settings: DemoSettings, verbose):

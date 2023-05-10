@@ -1,4 +1,5 @@
 import dataclasses
+from pathlib import Path
 
 
 @dataclasses.dataclass
@@ -11,6 +12,14 @@ class SimpleExample:
     two: str = 'bar'
     three: str = ''
     number: int = 123
+
+
+###########################################################################################
+
+
+@dataclasses.dataclass
+class PathExample:
+    path: Path = Path('/foo/bar')
 
 
 ###########################################################################################

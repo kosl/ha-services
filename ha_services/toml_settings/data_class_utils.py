@@ -1,7 +1,7 @@
 import dataclasses
 
 
-def iter_dataclass(instance: dataclasses):
+def iter_dataclass(instance):
     for field in dataclasses.fields(instance):
         field_name = field.name
         field_value = getattr(instance, field_name)

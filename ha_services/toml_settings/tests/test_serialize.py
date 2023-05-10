@@ -6,7 +6,7 @@ import tomlkit
 from tomlkit import TOMLDocument
 
 from ha_services.toml_settings.serialize import dataclass2toml
-from ha_services.toml_settings.tests.fixtures import ComplexExample, SimpleExample
+from ha_services.toml_settings.tests.fixtures import ComplexExample, PathExample, SimpleExample
 
 
 class SerializeTestCase(TestCase):
@@ -25,6 +25,22 @@ class SerializeTestCase(TestCase):
                 two = "bar"
                 three = ""
                 number = 123
+                '''
+            ),
+        )
+
+    def test_dataclass2toml_path(self):
+        document = dataclass2toml(instance=PathExample())
+        self.assertIsInstance(document, TOMLDocument)
+        self.assertEqual(document.unwrap(), {'path': '/foo/bar'})
+
+        doc_str = tomlkit.dumps(document, sort_keys=False).rstrip()
+        self.assertEqual(
+            doc_str,
+            inspect.cleandoc(
+                '''
+                # PathExample(path: pathlib.Path = PosixPath('/foo/bar'))
+                path = "/foo/bar"
                 '''
             ),
         )

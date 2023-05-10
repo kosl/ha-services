@@ -5,9 +5,12 @@ import logging
 import sys
 from pathlib import Path
 
+import rich_click
 import rich_click as click
 from bx_py_utils.path import assert_is_file
 from rich import print  # noqa
+from rich.console import Console
+from rich.traceback import install as rich_traceback_install
 from rich_click import RichGroup
 
 import ha_services
@@ -16,7 +19,13 @@ from ha_services.example import DemoSettings, publish_forever
 from ha_services.log_setup import basic_log_setup
 from ha_services.mqtt4homeassistant.data_classes import MqttSettings
 from ha_services.mqtt4homeassistant.mqtt import get_connected_client
-from ha_services.toml_settings.api import debug_print_user_settings, edit_user_settings, get_user_settings
+from ha_services.systemd.api import ServiceControl, print_systemd_file
+from ha_services.toml_settings.api import (
+    debug_print_user_settings,
+    edit_user_settings,
+    get_user_settings,
+    get_user_settings_or_exit,
+)
 from ha_services.toml_settings.exceptions import UserSettingsNotFound
 
 
@@ -104,6 +113,71 @@ def debug_settings(debug):
 cli.add_command(debug_settings)
 
 
+######################################################################################################
+
+
+@click.command()
+def debug_systemd_config():
+    """
+    Print Systemd service template + context + rendered file content.
+    """
+    user_settings: DemoSettings = get_user_settings_or_exit(user_settings=DemoSettings(), settings_path=SETTINGS_PATH)
+    print_systemd_file(info=user_settings.systemd)
+
+
+cli.add_command(debug_systemd_config)
+
+
+@click.command()
+def setup_systemd_service():
+    """
+    Write Systemd service file, enable it and (re-)start the service. (May need sudo)
+    """
+    user_settings: DemoSettings = get_user_settings_or_exit(user_settings=DemoSettings(), settings_path=SETTINGS_PATH)
+    ServiceControl(info=user_settings.systemd).setup_and_restart_systemd_service()
+
+
+cli.add_command(setup_systemd_service)
+
+
+@click.command()
+def remove_systemd_service():
+    """
+    Write Systemd service file, enable it and (re-)start the service. (May need sudo)
+    """
+    user_settings: DemoSettings = get_user_settings_or_exit(user_settings=DemoSettings(), settings_path=SETTINGS_PATH)
+    ServiceControl(info=user_settings.systemd).remove_systemd_service()
+
+
+cli.add_command(remove_systemd_service)
+
+
+@click.command()
+def systemd_status():
+    """
+    Display status of systemd service. (May need sudo)
+    """
+    user_settings: DemoSettings = get_user_settings_or_exit(user_settings=DemoSettings(), settings_path=SETTINGS_PATH)
+    ServiceControl(info=user_settings.systemd).status()
+
+
+cli.add_command(systemd_status)
+
+
+@click.command()
+def systemd_stop():
+    """
+    Stops the systemd service. (May need sudo)
+    """
+    user_settings: DemoSettings = get_user_settings_or_exit(user_settings=DemoSettings(), settings_path=SETTINGS_PATH)
+    ServiceControl(info=user_settings.systemd).stop()
+
+
+cli.add_command(systemd_stop)
+
+######################################################################################################
+
+
 @click.command()
 @click.option('--debug/--no-debug', **OPTION_ARGS_DEFAULT_FALSE)
 def test_mqtt_connection(debug):
@@ -160,6 +234,14 @@ cli.add_command(publish_loop)
 
 def main():
     print(f'[bold][green]ha-services[/green] DEMO cli v[cyan]{__version__}')
+
+    console = Console()
+    rich_traceback_install(
+        width=console.size.width,  # full terminal width
+        show_locals=True,
+        suppress=[click, rich_click],
+        max_frames=2,
+    )
 
     # Execute Click CLI:
     cli.name = './cli.py'

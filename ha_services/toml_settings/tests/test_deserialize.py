@@ -1,12 +1,13 @@
 import dataclasses
 import inspect
 import logging
+from pathlib import Path
 from unittest import TestCase
 
 import tomlkit
 
 from ha_services.toml_settings.deserialize import toml2dataclass
-from ha_services.toml_settings.tests.fixtures import ComplexExample, SimpleExample
+from ha_services.toml_settings.tests.fixtures import ComplexExample, PathExample, SimpleExample
 
 
 class DeserializeTestCase(TestCase):
@@ -73,6 +74,34 @@ class DeserializeTestCase(TestCase):
                 #
                 'DEBUG:ha_services.toml_settings.deserialize:Default value 123 also used in toml file, ok.',
             ],
+        )
+
+    def test_toml2dataclass_path(self):
+        instance = PathExample()
+        data = dataclasses.asdict(instance)
+        self.assertEqual(
+            data,
+            {
+                'path': Path('/foo/bar'),
+            },
+        )
+
+        document = tomlkit.loads(
+            inspect.cleandoc(
+                '''
+                path = "/to/some/other/place/"
+                '''
+            ),
+        )
+
+        toml2dataclass(document=document, instance=instance)
+
+        data = dataclasses.asdict(instance)
+        self.assertEqual(
+            data,
+            {
+                'path': Path('/to/some/other/place'),
+            },
         )
 
     def test_toml2dataclass_inheritance(self):

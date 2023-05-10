@@ -1,5 +1,6 @@
 import dataclasses
 import logging
+from pathlib import Path
 
 import tomlkit
 from tomlkit import TOMLDocument
@@ -11,7 +12,7 @@ from ha_services.toml_settings.serialize import add_dataclass
 logger = logging.getLogger(__name__)
 
 
-def toml2dataclass(*, document: TOMLDocument, instance: dataclasses, _changed=False) -> bool:
+def toml2dataclass(*, document: TOMLDocument, instance, _changed=False) -> bool:
     """
     Sync toml and instance in place:
 
@@ -46,6 +47,23 @@ def toml2dataclass(*, document: TOMLDocument, instance: dataclasses, _changed=Fa
 
         if field_value == doc_value:
             logger.debug('Default value %r also used in toml file, ok.', field_value)
+        elif isinstance(field_value, Path):
+            logger.debug('Convert %r value %r to Path instance', field_name, field_value)
+            value = doc_value.unwrap()
+            if not isinstance(value, str):
+                logger.error(
+                    (
+                        'Toml value %s=%r is type %r but must be type str (Will be convert to Path instance)'
+                        ' -> ignored and use default value!'
+                    ),
+                    field_name,
+                    value,
+                    type(value).__name__,
+                )
+                document[field_name] = field_value  # Add default one
+                _changed = True
+            else:
+                setattr(instance, field_name, Path(value))
         elif not isinstance(field_value, type(doc_value.unwrap())):
             logger.error(
                 'Toml value %s=%r is type %r but must be type %r -> ignored and use default value!',
