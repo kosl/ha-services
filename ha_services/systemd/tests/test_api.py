@@ -8,7 +8,7 @@ from manageprojects.utilities import subprocess_utils
 
 from ha_services import __version__
 from ha_services.cli_tools.test_utils.assertion import assert_in
-from ha_services.systemd.api import ServiceControl, print_systemd_file
+from ha_services.systemd.api import ServiceControl
 from ha_services.systemd.tests.utilities import MockedSystemdServiceInfo
 
 
@@ -20,7 +20,7 @@ class MockedShutilWhich:
 class SystemdApiTestCase(TestCase):
     def test_print_systemd_file(self):
         with MockedSystemdServiceInfo(prefix='test_print_systemd_file_') as info, RedirectOut() as buffer:
-            print_systemd_file(info=info)
+            ServiceControl(info=info).debug_systemd_config()
 
         self.assertEqual(buffer.stderr, '')
         assert_in(

@@ -2,11 +2,65 @@ from __future__ import annotations
 
 import sys
 
+from bx_py_utils.test_utils.assertion import text_unified_diff
+from pygments.lexer import Lexer
 from rich.console import Console
 from rich.highlighter import ReprHighlighter
 from rich.panel import Panel
 from rich.pretty import Pretty
+from rich.syntax import Syntax
 from rich.text import Text
+
+
+def print_code(
+    code: str,
+    *,
+    title: str | None = None,
+    lexer: Lexer | str,
+    theme: str = 'ansi_dark',
+    background_color: str = '#090909',
+    line_numbers: bool = True,
+    console: Console | None = None,
+) -> None:
+    """
+    Print source code via Pygments
+    """
+    console = console or Console()
+
+    console.print()
+    console.rule(title)
+    console.print(
+        Syntax(
+            code,
+            lexer,
+            theme=theme,
+            background_color=background_color,
+            line_numbers=line_numbers,
+        )
+    )
+    console.rule()
+    console.print()
+
+
+def print_unified_diff(
+    txt1: str,
+    txt2: str,
+    *,
+    fromfile: str = 'got',
+    tofile: str = 'expected',
+    title: str = '[bright][green]unified diff[/green]:',
+    console: Console | None = None,
+) -> None:
+    """
+    Print a diff highlight with Pygments
+    """
+    diff = text_unified_diff(
+        txt1=txt1,
+        txt2=txt2,
+        fromfile=fromfile,
+        tofile=tofile,
+    )
+    print_code(code=diff, lexer='diff', title=title, console=console)
 
 
 class PanelPrinter:
@@ -55,6 +109,8 @@ def human_error(
     title='[red]Error',
     exit_code=None,
     exception: BaseException | None = None,
+    exception_extra_lines: int = 2,
+    exception_max_frames: int = 20,
     HighlighterClass=ReprHighlighter,
     border_style='bright_red',
     padding=(2, 5),
@@ -74,7 +130,12 @@ def human_error(
 
     if exception is not None:
         assert isinstance(exception, BaseException), f'Not a exception: {exception!r}'
-        console.print_exception(show_locals=True)
+        console.print_exception(
+            width=console.size.width,  # full terminal width
+            extra_lines=exception_extra_lines,
+            show_locals=True,
+            max_frames=exception_max_frames,
+        )
 
     console.print()
 

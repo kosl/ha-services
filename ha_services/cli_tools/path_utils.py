@@ -12,15 +12,39 @@ from bx_py_utils.path import assert_is_file
 logger = logging.getLogger(__name__)
 
 
+def is_path_name(name: str) -> None:
+    """
+    >>> is_path_name('a_example_filename')
+    >>> is_path_name('A Directory name')
+
+    >>> is_path_name('/not/valid/')
+    Traceback (most recent call last):
+        ...
+    AssertionError: Path name '/not/valid/' is not valid! (Not the same as: cleaned='valid')
+
+    >>> is_path_name('invalid.exe')
+    Traceback (most recent call last):
+        ...
+    AssertionError: Path name 'invalid.exe' is not valid! (Not the same as: cleaned='invalid')
+    """
+    cleaned = Path(name).stem
+    if name != cleaned:
+        raise AssertionError(f'Path name {name!r} is not valid! (Not the same as: {cleaned=!r})')
+
+
 def expand_user(path: Path) -> Path:
     """
     Returns a new path with expanded ~ and ~user constructs:
     Unlike the normal Python function, when called with sudo, the normal user path is used.
     So "~" is not expanded as "/root" -> it's expanded with the user home that sudo starts with!
     """
-
+    logger.debug(f'expand user path: {path}')
     if sudo_user := os.environ.get('SUDO_USER'):
+        if sudo_user == 'root':
+            logger.warning('Do not run this as root user! Please use a normal user and sudo!')
+
         env_user = getpass.getuser()
+        logger.debug(f'SUDO_USER:{sudo_user!r} <-> {env_user}')
         if sudo_user != env_user:
             # Get home directory of the user that starts sudo via password database:
             sudo_user_home = pwd.getpwnam(sudo_user).pw_dir
