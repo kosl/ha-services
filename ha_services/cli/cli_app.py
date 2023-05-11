@@ -19,14 +19,9 @@ from ha_services.example import DemoSettings, publish_forever
 from ha_services.log_setup import basic_log_setup
 from ha_services.mqtt4homeassistant.data_classes import MqttSettings
 from ha_services.mqtt4homeassistant.mqtt import get_connected_client
-from ha_services.systemd.api import ServiceControl, print_systemd_file
-from ha_services.toml_settings.api import (
-    debug_print_user_settings,
-    edit_user_settings,
-    get_user_settings,
-    get_user_settings_or_exit,
-)
-from ha_services.toml_settings.exceptions import UserSettingsNotFound
+from ha_services.systemd.api import ServiceControl
+from ha_services.systemd.data_classes import SystemdServiceInfo
+from ha_services.toml_settings.api import TomlSettings
 
 
 logger = logging.getLogger(__name__)
@@ -81,7 +76,8 @@ cli.add_command(version)
 
 ######################################################################################################
 
-SETTINGS_PATH = '~/.ha_services_example.toml'
+SETTINGS_DIR_NAME = 'ha-services'
+SETTINGS_FILE_NAME = 'ha-services-demo'
 
 
 @click.command()
@@ -91,7 +87,11 @@ def edit_settings(debug):
     Edit the settings file. On first call: Create the default one.
     """
     basic_log_setup(debug=debug)
-    edit_user_settings(user_settings=DemoSettings(), settings_path=SETTINGS_PATH)
+    TomlSettings(
+        dir_name=SETTINGS_DIR_NAME,
+        file_name=SETTINGS_FILE_NAME,
+        settings_dataclass=DemoSettings(),
+    ).open_in_editor()
 
 
 cli.add_command(edit_settings)
@@ -99,18 +99,19 @@ cli.add_command(edit_settings)
 
 @click.command()
 @click.option('--debug/--no-debug', **OPTION_ARGS_DEFAULT_TRUE)
-def debug_settings(debug):
+def print_settings(debug):
     """
     Display (anonymized) MQTT server username and password
     """
     basic_log_setup(debug=debug)
-    try:
-        debug_print_user_settings(user_settings=DemoSettings(), settings_path=SETTINGS_PATH)
-    except UserSettingsNotFound as err:
-        print(f'[yellow]No settings created yet[/yellow]: {err} [green](Hint: call "edit-settings" first!)')
+    TomlSettings(
+        dir_name=SETTINGS_DIR_NAME,
+        file_name=SETTINGS_FILE_NAME,
+        settings_dataclass=DemoSettings(),
+    ).print_settings()
 
 
-cli.add_command(debug_settings)
+cli.add_command(print_settings)
 
 
 ######################################################################################################
@@ -118,60 +119,105 @@ cli.add_command(debug_settings)
 
 
 @click.command()
-def debug_systemd_config():
+@click.option('--debug/--no-debug', **OPTION_ARGS_DEFAULT_TRUE)
+def debug_systemd_config(debug):
     """
     Print Systemd service template + context + rendered file content.
     """
-    user_settings: DemoSettings = get_user_settings_or_exit(user_settings=DemoSettings(), settings_path=SETTINGS_PATH)
-    print_systemd_file(info=user_settings.systemd)
+    basic_log_setup(debug=debug)
+    toml_settings = TomlSettings(
+        dir_name=SETTINGS_DIR_NAME,
+        file_name=SETTINGS_FILE_NAME,
+        settings_dataclass=DemoSettings(),
+    )
+    user_settings: DemoSettings = toml_settings.get_user_settings(debug=True)
+    systemd_settings: SystemdServiceInfo = user_settings.systemd
+
+    ServiceControl(info=systemd_settings).debug_systemd_config()
 
 
 cli.add_command(debug_systemd_config)
 
 
 @click.command()
-def setup_systemd_service():
+@click.option('--debug/--no-debug', **OPTION_ARGS_DEFAULT_TRUE)
+def setup_systemd_service(debug):
     """
     Write Systemd service file, enable it and (re-)start the service. (May need sudo)
     """
-    user_settings: DemoSettings = get_user_settings_or_exit(user_settings=DemoSettings(), settings_path=SETTINGS_PATH)
-    ServiceControl(info=user_settings.systemd).setup_and_restart_systemd_service()
+    basic_log_setup(debug=debug)
+    toml_settings = TomlSettings(
+        dir_name=SETTINGS_DIR_NAME,
+        file_name=SETTINGS_FILE_NAME,
+        settings_dataclass=DemoSettings(),
+    )
+    user_settings: DemoSettings = toml_settings.get_user_settings(debug=True)
+    systemd_settings: SystemdServiceInfo = user_settings.systemd
+
+    ServiceControl(info=systemd_settings).setup_and_restart_systemd_service()
 
 
 cli.add_command(setup_systemd_service)
 
 
 @click.command()
-def remove_systemd_service():
+@click.option('--debug/--no-debug', **OPTION_ARGS_DEFAULT_TRUE)
+def remove_systemd_service(debug):
     """
     Write Systemd service file, enable it and (re-)start the service. (May need sudo)
     """
-    user_settings: DemoSettings = get_user_settings_or_exit(user_settings=DemoSettings(), settings_path=SETTINGS_PATH)
-    ServiceControl(info=user_settings.systemd).remove_systemd_service()
+    basic_log_setup(debug=debug)
+    toml_settings = TomlSettings(
+        dir_name=SETTINGS_DIR_NAME,
+        file_name=SETTINGS_FILE_NAME,
+        settings_dataclass=DemoSettings(),
+    )
+    user_settings: DemoSettings = toml_settings.get_user_settings(debug=True)
+    systemd_settings: SystemdServiceInfo = user_settings.systemd
+
+    ServiceControl(info=systemd_settings).remove_systemd_service()
 
 
 cli.add_command(remove_systemd_service)
 
 
 @click.command()
-def systemd_status():
+@click.option('--debug/--no-debug', **OPTION_ARGS_DEFAULT_TRUE)
+def systemd_status(debug):
     """
     Display status of systemd service. (May need sudo)
     """
-    user_settings: DemoSettings = get_user_settings_or_exit(user_settings=DemoSettings(), settings_path=SETTINGS_PATH)
-    ServiceControl(info=user_settings.systemd).status()
+    basic_log_setup(debug=debug)
+    toml_settings = TomlSettings(
+        dir_name=SETTINGS_DIR_NAME,
+        file_name=SETTINGS_FILE_NAME,
+        settings_dataclass=DemoSettings(),
+    )
+    user_settings: DemoSettings = toml_settings.get_user_settings(debug=True)
+    systemd_settings: SystemdServiceInfo = user_settings.systemd
+
+    ServiceControl(info=systemd_settings).status()
 
 
 cli.add_command(systemd_status)
 
 
 @click.command()
-def systemd_stop():
+@click.option('--debug/--no-debug', **OPTION_ARGS_DEFAULT_TRUE)
+def systemd_stop(debug):
     """
     Stops the systemd service. (May need sudo)
     """
-    user_settings: DemoSettings = get_user_settings_or_exit(user_settings=DemoSettings(), settings_path=SETTINGS_PATH)
-    ServiceControl(info=user_settings.systemd).stop()
+    basic_log_setup(debug=debug)
+    toml_settings = TomlSettings(
+        dir_name=SETTINGS_DIR_NAME,
+        file_name=SETTINGS_FILE_NAME,
+        settings_dataclass=DemoSettings(),
+    )
+    user_settings: DemoSettings = toml_settings.get_user_settings(debug=True)
+    systemd_settings: SystemdServiceInfo = user_settings.systemd
+
+    ServiceControl(info=systemd_settings).stop()
 
 
 cli.add_command(systemd_stop)
@@ -187,13 +233,12 @@ def test_mqtt_connection(debug):
     Test connection to MQTT Server
     """
     basic_log_setup(debug=debug)
-    try:
-        user_settings: DemoSettings = get_user_settings(
-            user_settings=DemoSettings(), settings_path=SETTINGS_PATH, debug=True
-        )
-    except UserSettingsNotFound as err:
-        print(f'[yellow]No settings created yet[/yellow]: {err} [green](Hint: call "edit-settings" first!)')
-        return
+    toml_settings = TomlSettings(
+        dir_name=SETTINGS_DIR_NAME,
+        file_name=SETTINGS_FILE_NAME,
+        settings_dataclass=DemoSettings(),
+    )
+    user_settings: DemoSettings = toml_settings.get_user_settings(debug=True)
 
     settings: MqttSettings = user_settings.mqtt
     mqttc = get_connected_client(settings=settings, verbose=True)
@@ -214,13 +259,12 @@ def publish_loop(verbose, debug):
     Publish data via MQTT for Home Assistant (endless loop)
     """
     basic_log_setup(debug=debug)
-    try:
-        user_settings: DemoSettings = get_user_settings(
-            user_settings=DemoSettings(), settings_path=SETTINGS_PATH, debug=True
-        )
-    except UserSettingsNotFound as err:
-        print(f'[yellow]No settings created yet[/yellow]: {err} [green](Hint: call "edit-settings" first!)')
-        return
+    toml_settings = TomlSettings(
+        dir_name=SETTINGS_DIR_NAME,
+        file_name=SETTINGS_FILE_NAME,
+        settings_dataclass=DemoSettings(),
+    )
+    user_settings: DemoSettings = toml_settings.get_user_settings(debug=True)
 
     try:
         publish_forever(user_settings=user_settings, verbose=verbose)

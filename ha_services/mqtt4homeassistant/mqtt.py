@@ -8,6 +8,7 @@ from rich import print
 from rich.pretty import pprint
 
 from ha_services import __version__
+from ha_services.cli_tools.richt_utils import human_error
 from ha_services.mqtt4homeassistant.data_classes import HaMqttPayload, MqttSettings
 
 
@@ -45,16 +46,23 @@ def get_connected_client(settings: MqttSettings, verbose: bool = True, timeout=1
     client_id = get_client_id()
 
     if verbose:
-        print(
-            f'\nConnect [cyan]{settings.host}:{settings.port}[/cyan] as "[magenta]{client_id}[/magenta]"...', end=' '
-        )
+        print(f'\nConnect [cyan]{settings.host}:{settings.port}[/cyan] as "[magenta]{client_id}[/magenta]"', end='...')
 
     socket.setdefaulttimeout(timeout)  # Sadly: Timeout will not used in getaddrinfo()!
-    info = socket.getaddrinfo(settings.host, settings.port)
-    if not info:
-        print('[red]Resolve error: No info!')
-    elif verbose:
-        print('Host/port test [green]OK')
+    try:
+        info = socket.getaddrinfo(settings.host, settings.port)
+    except socket.gaierror as err:
+        human_error(
+            message=f'{err}\n(Hint: Check you host/port settings)',
+            title=f'[red]Error get address info from: [cyan]{settings.host}:{settings.port}[/cyan]',
+            exception=err,
+            exit_code=1,
+        )
+    else:
+        if not info:
+            print('[red]Resolve error: No info!')
+        elif verbose:
+            print('Host/port test [green]OK')
 
     mqttc = mqtt.Client(client_id=client_id)
     mqttc.on_connect = OnConnectCallback(verbose=verbose)
@@ -63,8 +71,8 @@ def get_connected_client(settings: MqttSettings, verbose: bool = True, timeout=1
     if settings.user_name and settings.password:
         if verbose:
             print(
-                f'login with user: {anonymize(settings.user_name)} password:{anonymize(settings.password)}...',
-                end=' ',
+                f'login with user: {anonymize(settings.user_name)} password:{anonymize(settings.password)}',
+                end='...',
             )
         mqttc.username_pw_set(settings.user_name, settings.password)
 

@@ -44,8 +44,6 @@ class SystemdServiceInfo:
     Defaults are for the "DEMO publish-loop"
     """
 
-    template_context: SystemdServiceTemplateContext = dataclasses.field(default_factory=SystemdServiceTemplateContext)
-
     template_path: Path = dataclasses.field(default_factory=get_template_path)
 
     systemd_base_path: Path = Path('/etc/systemd/system/')
@@ -53,6 +51,8 @@ class SystemdServiceInfo:
     # Set by post init:
     service_slug: str = None
     service_file_path: Path = None
+
+    template_context: SystemdServiceTemplateContext = dataclasses.field(default_factory=SystemdServiceTemplateContext)
 
     def __post_init__(self):
         assert_is_dir(self.systemd_base_path)
