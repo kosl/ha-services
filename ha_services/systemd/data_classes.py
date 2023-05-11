@@ -5,7 +5,7 @@ from string import Template
 from bx_py_utils.path import assert_is_dir, assert_is_file
 
 from ha_services import __version__
-from ha_services.cli_tools.richt_utils import print_human_error
+from ha_services.cli_tools.richt_utils import human_error
 from ha_services.mqtt4homeassistant.utilities.string_utils import slugify
 from ha_services.systemd.defaults import (
     get_demo_exec_start,
@@ -70,9 +70,10 @@ class SystemdServiceInfo:
         try:
             validate_template(content=self.get_template_content(), context=self.get_template_context())
         except InvalidTemplate as err:
-            print_human_error(
+            human_error(
                 f'Template {self.template_path} is not valid:\n{err}',
                 title='[red]invalid Systemd template',
+                exception=err,
             )
 
     def get_template_content(self) -> str:

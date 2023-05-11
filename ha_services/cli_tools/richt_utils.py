@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+import sys
+
 from rich.console import Console
 from rich.highlighter import ReprHighlighter
 from rich.panel import Panel
@@ -45,14 +49,37 @@ class PanelPrinter:
         return content
 
 
-def print_human_error(
-    error_message,
+def human_error(
+    message: str,
     *,
-    title='[red]ERROR',
+    title='[red]Error',
+    exit_code=None,
+    exception: BaseException | None = None,
     HighlighterClass=ReprHighlighter,
     border_style='bright_red',
     padding=(2, 5),
     console=None,
 ):
+    """
+    Print a message in a Panel.
+    Optional:
+        - print traceback first
+        - Exit with: sys.exit(exit_code)
+    """
+    if console is None:
+        use_stderr = exception is not None
+        console = Console(stderr=use_stderr)
+
+    console.print('\n')
+
+    if exception is not None:
+        assert isinstance(exception, BaseException), f'Not a exception: {exception!r}'
+        console.print_exception(show_locals=True)
+
+    console.print()
+
     pp = PanelPrinter(HighlighterClass=HighlighterClass, border_style=border_style, padding=padding, console=console)
-    pp.print_panel(content=error_message, title=title)
+    pp.print_panel(content=message, title=title)
+
+    if exit_code is not None:
+        sys.exit(exit_code)

@@ -114,6 +114,7 @@ cli.add_command(debug_settings)
 
 
 ######################################################################################################
+# Manage systemd service commands:
 
 
 @click.command()
@@ -176,6 +177,7 @@ def systemd_stop():
 cli.add_command(systemd_stop)
 
 ######################################################################################################
+# MQTT DEMO commands:
 
 
 @click.command()

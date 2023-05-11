@@ -1,12 +1,10 @@
-import sys
 from subprocess import CalledProcessError
 
 from manageprojects.utilities.subprocess_utils import verbose_check_call
 from rich import print  # noqa
-from rich.console import Console
 from rich.highlighter import ReprHighlighter
 
-from ha_services.cli_tools.richt_utils import PanelPrinter, print_human_error
+from ha_services.cli_tools.richt_utils import PanelPrinter, human_error
 from ha_services.systemd.data_classes import SystemdServiceInfo
 
 
@@ -56,18 +54,12 @@ class ServiceControl:
     # Helper
 
     def sudo_hint_exception_exit(self, err, exit_code=1):
-        console = Console(stderr=True)
-        console.print_exception(
-            width=console.size.width,  # full terminal width
-            show_locals=True,
-            max_frames=2,
-        )
-        console.print('\n')
-        print_human_error(
-            error_message=f'{err}\n\nHint: Maybe **sudo** is needed for this command!\nTry again with sudo.',
+        human_error(
+            f'{err}\n\nHint: Maybe **sudo** is needed for this command!\nTry again with sudo.',
             title='[red]Permission error',
+            exception=err,
+            exit_code=exit_code,
         )
-        sys.exit(exit_code)
 
     def write_service_file(self):
         print(f'Write "{self.info.service_file_path}"...')
@@ -96,11 +88,12 @@ class ServiceControl:
         if with_service_name:
             args.append(self.service_name)
             if not self.info.service_file_path.is_file():
-                print_human_error(
+                human_error(
                     f'Systemd service file not found here: {self.info.service_file_path}'
-                    '\n\nHint: Setup systemd service first!'
+                    '\n\nHint: Setup systemd service first!',
+                    title='[red]Missing systems service file',
+                    exit_code=1,
                 )
-                sys.exit(1)
 
         try:
             verbose_check_call(*args)

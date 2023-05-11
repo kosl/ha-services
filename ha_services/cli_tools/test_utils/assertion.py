@@ -24,3 +24,8 @@ def assert_in(content: str, parts: tuple[str, ...], strip_ansi=True) -> None:
             content='\n\n'.join(missing),
         )
         raise AssertionError(f'assert_in(): {len(missing)} parts not found in content, see output above')
+
+
+def assert_startswith(text, prefix):
+    if not text.startswith(prefix):
+        raise AssertionError(f'{text!r} does not starts with: {prefix!r}')

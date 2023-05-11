@@ -8,10 +8,11 @@ from rich import print  # noqa
 from rich.console import Console
 from tomlkit import TOMLDocument
 
+from ha_services.cli_tools.path_utils import backup
 from ha_services.toml_settings.debug import print_dataclasses
 from ha_services.toml_settings.deserialize import toml2dataclass
 from ha_services.toml_settings.exceptions import UserSettingsNotFound
-from ha_services.toml_settings.path_utils import backup, clean_settings_path
+from ha_services.toml_settings.path_utils import clean_settings_path
 from ha_services.toml_settings.sensible_editor import open_editor_for
 from ha_services.toml_settings.serialize import dataclass2toml
 
@@ -33,8 +34,10 @@ def edit_user_settings(*, user_settings, settings_path: str) -> None:
 def get_user_settings(*, user_settings, settings_path: str, debug: bool = False) -> dataclasses:
     settings_path = clean_settings_path(settings_path)
     if debug:
-        print(f'Use user settings file: {settings_path}')
+        print(f'Use user settings file: {settings_path}', end='...')
     if not settings_path.is_file():
+        if debug:
+            print('[red]not found!')
         raise UserSettingsNotFound(settings_path)
 
     doc_str = settings_path.read_text(encoding='UTF-8')
@@ -48,6 +51,8 @@ def get_user_settings(*, user_settings, settings_path: str, debug: bool = False)
         backup(settings_path)
         settings_path.write_text(doc_str, encoding='UTF-8')
 
+    if debug:
+        print('[green]read, ok.')
     return user_settings
 
 
