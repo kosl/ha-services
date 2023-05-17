@@ -15,12 +15,11 @@ from rich_click import RichGroup
 
 import ha_services
 from ha_services import __version__, constants
-from ha_services.example import DemoSettings, publish_forever
+from ha_services.example import DemoSettings, SystemdServiceInfo, publish_forever
 from ha_services.log_setup import basic_log_setup
 from ha_services.mqtt4homeassistant.data_classes import MqttSettings
 from ha_services.mqtt4homeassistant.mqtt import get_connected_client
 from ha_services.systemd.api import ServiceControl
-from ha_services.systemd.data_classes import SystemdServiceInfo
 from ha_services.toml_settings.api import TomlSettings
 
 

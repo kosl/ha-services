@@ -4,7 +4,6 @@ from unittest import TestCase
 from tomlkit import TOMLDocument
 
 from ha_services.example import DemoSettings
-from ha_services.systemd.data_classes import SystemdServiceInfo
 from ha_services.toml_settings.deserialize import toml2dataclass
 from ha_services.toml_settings.serialize import dataclass2toml
 
@@ -20,7 +19,7 @@ class TomlSettingsTestCase(TestCase):
         self.assertEqual(data['systemd']['service_slug'], 'haservices_demo')
         self.assertEqual(data['systemd']['systemd_base_path'], '/etc/systemd/system')
 
-        instance = DemoSettings(systemd=SystemdServiceInfo(service_slug='foo bar'))
+        instance = DemoSettings()
         instance.systemd.systemd_base_path = Path('/foo/bar')
 
         toml2dataclass(document=document, instance=instance)

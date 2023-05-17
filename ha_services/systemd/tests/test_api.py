@@ -6,8 +6,9 @@ from bx_py_utils.test_utils.redirect import RedirectOut
 from manageprojects.test_utils.subprocess import SubprocessCallMock
 from manageprojects.utilities import subprocess_utils
 
-from ha_services import __version__
+
 from ha_services.cli_tools.test_utils.assertion import assert_in
+from ha_services.example import SystemdServiceInfo
 from ha_services.systemd.api import ServiceControl
 from ha_services.systemd.tests.utilities import MockedSystemdServiceInfo
 
@@ -19,7 +20,9 @@ class MockedShutilWhich:
 
 class SystemdApiTestCase(TestCase):
     def test_print_systemd_file(self):
-        with MockedSystemdServiceInfo(prefix='test_print_systemd_file_') as info, RedirectOut() as buffer:
+        with MockedSystemdServiceInfo(
+            prefix='test_print_systemd_file_', SystemdServiceInfoClass=SystemdServiceInfo
+        ) as info, RedirectOut() as buffer:
             ServiceControl(info=info).debug_systemd_config()
 
         self.assertEqual(buffer.stderr, '')
@@ -27,14 +30,14 @@ class SystemdApiTestCase(TestCase):
             content=buffer.stdout,
             parts=(
                 '[Unit]',
-                f'Description=HaServices Demo {__version__}',
+                'Description=HaServices Demo',
                 'ExecStart=/mocked/.venv/bin/python3 -m ha_services_app publish-loop',
                 'SyslogIdentifier=haservices_demo',
             ),
         )
 
     def test_service_control(self):
-        with MockedSystemdServiceInfo(prefix='test_') as info:
+        with MockedSystemdServiceInfo(prefix='test_', SystemdServiceInfoClass=SystemdServiceInfo) as info:
             service_control = ServiceControl(info=info)
 
             for func_name in ('enable', 'restart', 'stop', 'status', 'remove_systemd_service'):

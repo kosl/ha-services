@@ -9,10 +9,28 @@ from rich import print  # noqa
 from ha_services.mqtt4homeassistant.converter import values2mqtt_payload
 from ha_services.mqtt4homeassistant.data_classes import HaValue, HaValues, MqttSettings
 from ha_services.mqtt4homeassistant.mqtt import HaMqttPublisher
-from ha_services.systemd.data_classes import SystemdServiceInfo
+from ha_services.systemd.data_classes import BaseSystemdServiceInfo, BaseSystemdServiceTemplateContext
 
 
 logger = logging.getLogger(__name__)
+
+
+@dataclasses.dataclass
+class SystemdServiceTemplateContext(BaseSystemdServiceTemplateContext):
+    """
+    HaServices Demo - Context values for the systemd service file content.
+    """
+
+    verbose_service_name: str = 'HaServices Demo'
+
+
+@dataclasses.dataclass
+class SystemdServiceInfo(BaseSystemdServiceInfo):
+    """
+    HaServices Demo - Information for systemd helper functions.
+    """
+
+    template_context: SystemdServiceTemplateContext = dataclasses.field(default_factory=SystemdServiceTemplateContext)
 
 
 @dataclasses.dataclass
@@ -33,12 +51,20 @@ class DemoSettings:
     See "./cli.py --help" for more information.
     """
 
-    mqtt: dataclasses = dataclasses.field(default_factory=MqttSettings)
-    app: dataclasses = dataclasses.field(default_factory=MqttExampleValues)
+    # Information how to setup the systemd services:
     systemd: dataclasses = dataclasses.field(default_factory=SystemdServiceInfo)
+
+    # Information about the MQTT server:
+    mqtt: dataclasses = dataclasses.field(default_factory=MqttSettings)
+
+    # Example "app" data:
+    app: dataclasses = dataclasses.field(default_factory=MqttExampleValues)
 
 
 def publish_forever(*, user_settings: DemoSettings, verbose):
+    """
+    Publish "something" to MQTT server. It's just a DEMO ;)
+    """
     publisher = HaMqttPublisher(
         settings=user_settings.mqtt,
         verbose=verbose,

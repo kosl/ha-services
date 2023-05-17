@@ -7,7 +7,7 @@ from rich.console import Console
 from rich.highlighter import ReprHighlighter
 
 from ha_services.cli_tools.richt_utils import PanelPrinter, human_error, print_code, print_unified_diff
-from ha_services.systemd.data_classes import SystemdServiceInfo
+from ha_services.systemd.data_classes import BaseSystemdServiceInfo
 
 
 logger = logging.getLogger(__name__)
@@ -22,7 +22,7 @@ class ServiceControl:
     Manage Systemd service
     """
 
-    def __init__(self, info: SystemdServiceInfo):
+    def __init__(self, info: BaseSystemdServiceInfo):
         self.info = info
         self.service_name = info.service_file_path.name
 

@@ -1,5 +1,5 @@
 [Unit]
-Description=${verbose_service_name} ${version}
+Description=${verbose_service_name}
 After=syslog.target network.target
 
 [Service]
