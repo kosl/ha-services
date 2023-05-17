@@ -4,7 +4,6 @@ from string import Template
 
 from bx_py_utils.path import assert_is_dir, assert_is_file
 
-from ha_services import __version__
 from ha_services.cli_tools.richt_utils import human_error
 from ha_services.mqtt4homeassistant.utilities.string_utils import slugify
 from ha_services.systemd.defaults import (
@@ -18,15 +17,13 @@ from ha_services.systemd.template import InvalidTemplate, validate_template
 
 
 @dataclasses.dataclass
-class SystemdServiceTemplateContext:
+class BaseSystemdServiceTemplateContext:
     """
-    Context values for the systemd service file content.
-    Defaults are for the "DEMO publish-loop"
+    Context values for the systemd service file content
     """
 
-    verbose_service_name: str = 'HaServices Demo'
+    verbose_service_name: str  # Must be set in child class!
 
-    version: str = __version__
     user: str = dataclasses.field(default_factory=get_user_name)
     group: str = dataclasses.field(default_factory=get_user_group)
     work_dir: Path = dataclasses.field(default_factory=get_work_directory)
@@ -38,21 +35,20 @@ class SystemdServiceTemplateContext:
 
 
 @dataclasses.dataclass
-class SystemdServiceInfo:
+class BaseSystemdServiceInfo:
     """
-    Information for systemd helper functions.
-    Defaults are for the "DEMO publish-loop"
+    Information for systemd helper functions
     """
+
+    template_context: BaseSystemdServiceTemplateContext  # Must be set in child class!
 
     template_path: Path = dataclasses.field(default_factory=get_template_path)
 
     systemd_base_path: Path = Path('/etc/systemd/system/')
 
-    # Set by post init:
+    # Set by post init from "template_context" information:
     service_slug: str = None
     service_file_path: Path = None
-
-    template_context: SystemdServiceTemplateContext = dataclasses.field(default_factory=SystemdServiceTemplateContext)
 
     def __post_init__(self):
         assert_is_dir(self.systemd_base_path)

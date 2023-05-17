@@ -2,8 +2,7 @@ import tempfile
 from pathlib import Path
 from unittest import TestCase
 
-from ha_services import __version__
-from ha_services.systemd.data_classes import SystemdServiceInfo
+from ha_services.example import SystemdServiceInfo
 from ha_services.systemd.tests.utilities import MockedSystemdServiceInfo
 
 
@@ -13,12 +12,13 @@ class SystemdDataClassesTestCase(TestCase):
 
         # Check some samples:
         self.assertEqual(info.template_context.verbose_service_name, 'HaServices Demo')
-        self.assertEqual(info.template_context.version, __version__)
         self.assertEqual(info.service_slug, 'haservices_demo')
         self.assertEqual(info.template_context.syslog_identifier, 'haservices_demo')
         self.assertEqual(info.service_file_path, Path('/etc/systemd/system/haservices_demo.service'))
 
-        with MockedSystemdServiceInfo(prefix='test_systemd_service_info_') as info:
+        with MockedSystemdServiceInfo(
+            prefix='test_systemd_service_info_', SystemdServiceInfoClass=SystemdServiceInfo
+        ) as info:
             self.assertIsInstance(info, SystemdServiceInfo)
             self.assertEqual(info.template_context.user, 'MockedUserName')
             self.assertEqual(info.template_context.group, 'MockedUserName')
