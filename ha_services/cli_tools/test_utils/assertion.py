@@ -28,4 +28,4 @@ def assert_in(content: str, parts: tuple[str, ...], strip_ansi=True) -> None:
 
 def assert_startswith(text, prefix):
     if not text.startswith(prefix):
-        raise AssertionError(f'{text!r} does not starts with: {prefix!r}')
+        raise AssertionError(f'{prefix=!r} is not at the beginning of: {text!r}')
