@@ -8,6 +8,7 @@ import rich_click
 from bx_py_utils.environ import OverrideEnviron
 from bx_py_utils.path import assert_is_file
 from bx_py_utils.test_utils.context_managers import MassContextManager
+from click._compat import strip_ansi as strip_ansi_codes
 from manageprojects.utilities.subprocess_utils import verbose_check_output
 from rich import get_console
 from rich.console import Console, get_windows_console_features
@@ -90,6 +91,8 @@ class NoColorRichClickCli(NoColorEnvRichClick):
             exit_on_error=exit_on_error,
         )
 
+        stdout = strip_ansi_codes(stdout)  # FIXME: Needed on github CI, why?!?
+
         if strip_line_prefix:
             # Skip header lines:
             lines = stdout.splitlines()
@@ -100,16 +103,7 @@ class NoColorRichClickCli(NoColorEnvRichClick):
                     found = True
                     break
 
-            try:
-                assert found is True, f'Line that starts with {strip_line_prefix=} not found in: {stdout!r}'
-            except AssertionError:
-                from rich.pretty import pprint
-
-                pprint(os.environ)
-                from rich.diagnose import report
-
-                report()
-                raise
+            assert found is True, f'Line that starts with {strip_line_prefix=} not found in: {stdout!r}'
 
             stdout = '\n'.join(line.rstrip() for line in stdout.splitlines())
 
