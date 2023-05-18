@@ -5,8 +5,14 @@ from ha_services.cli.cli_app import SETTINGS_DIR_NAME, SETTINGS_FILE_NAME
 from ha_services.cli.dev import PACKAGE_ROOT
 from ha_services.cli_tools.test_utils.assertion import assert_in
 from ha_services.cli_tools.test_utils.cli_readme import AssertCliHelpInReadme
+from ha_services.cli_tools.test_utils.rich_test_utils import (
+    assert_no_color_env,
+    assert_rich_click_no_color,
+    assert_rich_no_color,
+    assert_subprocess_rich_diagnose_no_color,
+)
 from ha_services.example import DemoSettings
-from ha_services.toml_settings.test_utils.cli_mock import CliMock
+from ha_services.toml_settings.test_utils.cli_mock import TomlSettingsCliMock
 
 
 class ReadmeTestCase(BaseTestCase):
@@ -25,11 +31,12 @@ class ReadmeTestCase(BaseTestCase):
             ),
         )
 
-        cls.cli_mock = CliMock(
+        cls.cli_mock = TomlSettingsCliMock(
             SettingsDataclass=DemoSettings,
             settings_overwrites=settings_overwrites,
             dir_name=SETTINGS_DIR_NAME,
             file_name=SETTINGS_FILE_NAME,
+            width=120,
         )
         cls.cli_mock.__enter__()
 
@@ -40,11 +47,17 @@ class ReadmeTestCase(BaseTestCase):
         super().tearDownClass()
         cls.cli_mock.__exit__(None, None, None)
 
+    def test_cli_mock(self):
+        assert_no_color_env(width=120)
+        assert_subprocess_rich_diagnose_no_color(width=120)
+        assert_rich_no_color(width=120)
+        assert_rich_click_no_color(width=120)
+
     def invoke_cli(self, *args):
-        return self.cli_mock.invoke(cli_bin=PACKAGE_ROOT / 'cli.py', args=args)
+        return self.cli_mock.invoke(cli_bin=PACKAGE_ROOT / 'cli.py', args=args, strip_line_prefix='Usage: ')
 
     def invoke_dev_cli(self, *args):
-        return self.cli_mock.invoke(cli_bin=PACKAGE_ROOT / 'dev-cli.py', args=args)
+        return self.cli_mock.invoke(cli_bin=PACKAGE_ROOT / 'dev-cli.py', args=args, strip_line_prefix='Usage: ')
 
     def test_main_help(self):
         stdout = self.invoke_cli('--help')
