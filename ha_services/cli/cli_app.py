@@ -119,7 +119,7 @@ cli.add_command(print_settings)
 
 @click.command()
 @click.option('--debug/--no-debug', **OPTION_ARGS_DEFAULT_TRUE)
-def debug_systemd_config(debug):
+def systemd_debug(debug):
     """
     Print Systemd service template + context + rendered file content.
     """
@@ -135,12 +135,12 @@ def debug_systemd_config(debug):
     ServiceControl(info=systemd_settings).debug_systemd_config()
 
 
-cli.add_command(debug_systemd_config)
+cli.add_command(systemd_debug)
 
 
 @click.command()
 @click.option('--debug/--no-debug', **OPTION_ARGS_DEFAULT_TRUE)
-def setup_systemd_service(debug):
+def systemd_setup(debug):
     """
     Write Systemd service file, enable it and (re-)start the service. (May need sudo)
     """
@@ -156,12 +156,12 @@ def setup_systemd_service(debug):
     ServiceControl(info=systemd_settings).setup_and_restart_systemd_service()
 
 
-cli.add_command(setup_systemd_service)
+cli.add_command(systemd_setup)
 
 
 @click.command()
 @click.option('--debug/--no-debug', **OPTION_ARGS_DEFAULT_TRUE)
-def remove_systemd_service(debug):
+def systemd_remove(debug):
     """
     Write Systemd service file, enable it and (re-)start the service. (May need sudo)
     """
@@ -177,7 +177,7 @@ def remove_systemd_service(debug):
     ServiceControl(info=systemd_settings).remove_systemd_service()
 
 
-cli.add_command(remove_systemd_service)
+cli.add_command(systemd_remove)
 
 
 @click.command()
