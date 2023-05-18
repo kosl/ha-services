@@ -1,7 +1,16 @@
 from pathlib import Path
 from unittest import TestCase
 
-from ha_services.toml_settings.test_utils.data_class_utils import replace_dataclass_values, replace_path_values
+from bx_py_utils.path import assert_is_dir, assert_is_file
+
+from ha_services.cli.cli_app import SETTINGS_DIR_NAME, SETTINGS_FILE_NAME
+from ha_services.example import DemoSettings
+from ha_services.toml_settings.api import TomlSettings
+from ha_services.toml_settings.test_utils.data_class_utils import (
+    MockTomlSettings,
+    replace_dataclass_values,
+    replace_path_values,
+)
 from ha_services.toml_settings.tests.fixtures import ComplexExample, PathExample2
 
 
@@ -39,3 +48,40 @@ class TestUtilsTestCase(TestCase):
         # Check after:
         self.assertEqual(instance.path, '/foo/baz')
         self.assertEqual(instance.sub_path.path, '/foo/bar')
+
+    def test_toml_settings_mock(self):
+        settings_overwrites = dict(
+            systemd=dict(
+                template_context=dict(
+                    user='MockedUserName',
+                    group='MockedUserName',
+                )
+            ),
+        )
+        with MockTomlSettings(
+            SettingsDataclass=DemoSettings,
+            settings_overwrites=settings_overwrites,
+            dir_name=SETTINGS_DIR_NAME,
+            file_name=SETTINGS_FILE_NAME,
+            prefix='test_mock',
+        ) as cm:
+            self.assertIsInstance(cm, MockTomlSettings)
+            self.assertIsInstance(cm.temp_path, Path)
+            assert_is_dir(cm.temp_path)
+
+            toml_settings = cm.toml_settings
+            self.assertIsInstance(toml_settings, TomlSettings)
+            assert_is_file(toml_settings.file_path)
+
+            settings = toml_settings.settings_dataclass
+            self.assertIsInstance(settings, DemoSettings)
+
+            # Check some sample values:
+            self.assertEqual(settings.systemd.service_slug, 'haservices_demo')
+            self.assertEqual(settings.systemd.template_context.verbose_service_name, 'HaServices Demo')
+            self.assertEqual(settings.systemd.template_context.user, 'MockedUserName')
+            self.assertEqual(settings.systemd.template_context.group, 'MockedUserName')
+            self.assertEqual(settings.systemd.template_context.work_dir, cm.temp_path)
+            self.assertEqual(settings.app.device_name, 'ha-services-demo')
+
+        self.assertFalse(cm.temp_path.exists())
