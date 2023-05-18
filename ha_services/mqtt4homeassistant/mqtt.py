@@ -8,7 +8,7 @@ from rich import print
 from rich.pretty import pprint
 
 from ha_services import __version__
-from ha_services.cli_tools.richt_utils import human_error
+from ha_services.cli_tools.rich_utils import human_error
 from ha_services.mqtt4homeassistant.data_classes import HaMqttPayload, MqttSettings
 
 

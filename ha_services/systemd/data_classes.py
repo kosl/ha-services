@@ -4,7 +4,7 @@ from string import Template
 
 from bx_py_utils.path import assert_is_dir, assert_is_file
 
-from ha_services.cli_tools.richt_utils import human_error
+from ha_services.cli_tools.rich_utils import human_error
 from ha_services.mqtt4homeassistant.utilities.string_utils import slugify
 from ha_services.systemd.defaults import (
     get_demo_exec_start,

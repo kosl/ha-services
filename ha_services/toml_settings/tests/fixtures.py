@@ -22,6 +22,12 @@ class PathExample:
     path: Path = Path('/foo/bar')
 
 
+@dataclasses.dataclass
+class PathExample2:
+    path: Path = Path('/foo/baz')
+    sub_path: PathExample = dataclasses.field(default_factory=PathExample)
+
+
 ###########################################################################################
 
 

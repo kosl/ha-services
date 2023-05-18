@@ -10,7 +10,7 @@ from manageprojects.utilities import subprocess_utils
 from ha_services.cli_tools.test_utils.assertion import assert_in
 from ha_services.example import SystemdServiceInfo
 from ha_services.systemd.api import ServiceControl
-from ha_services.systemd.tests.utilities import MockedSystemdServiceInfo
+from ha_services.systemd.test_utils.mock_systemd_info import MockSystemdServiceInfo
 
 
 class MockedShutilWhich:
@@ -20,10 +20,11 @@ class MockedShutilWhich:
 
 class SystemdApiTestCase(TestCase):
     def test_print_systemd_file(self):
-        with MockedSystemdServiceInfo(
+        with MockSystemdServiceInfo(
             prefix='test_print_systemd_file_', SystemdServiceInfoClass=SystemdServiceInfo
-        ) as info, RedirectOut() as buffer:
-            ServiceControl(info=info).debug_systemd_config()
+        ) as cm, RedirectOut() as buffer:
+            systemd_info = cm.systemd_info
+            ServiceControl(info=systemd_info).debug_systemd_config()
 
         self.assertEqual(buffer.stderr, '')
         assert_in(
@@ -37,8 +38,9 @@ class SystemdApiTestCase(TestCase):
         )
 
     def test_service_control(self):
-        with MockedSystemdServiceInfo(prefix='test_', SystemdServiceInfoClass=SystemdServiceInfo) as info:
-            service_control = ServiceControl(info=info)
+        with MockSystemdServiceInfo(prefix='test_', SystemdServiceInfoClass=SystemdServiceInfo) as cm:
+            systemd_info = cm.systemd_info
+            service_control = ServiceControl(info=systemd_info)
 
             for func_name in ('enable', 'restart', 'stop', 'status', 'remove_systemd_service'):
                 with self.subTest(func_name):
@@ -61,14 +63,14 @@ class SystemdApiTestCase(TestCase):
             assert_in(
                 content=buffer.stdout,
                 parts=(
-                    f'Write "{info.service_file_path}"...',
+                    f'Write "{systemd_info.service_file_path}"...',
                     'systemctl daemon-reload',
                     'systemctl enable haservices_demo.service',
                     'systemctl restart haservices_demo.service',
                     'systemctl status haservices_demo.service',
                 ),
             )
-            assert_is_file(info.service_file_path)
+            assert_is_file(systemd_info.service_file_path)
 
             self.assertEqual(
                 mock.get_popenargs(),

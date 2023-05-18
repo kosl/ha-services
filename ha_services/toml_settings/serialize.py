@@ -25,8 +25,6 @@ def add_value(*, field_name, item: Item, value):
 def add_dataclass(document: TOMLDocument, name, instance):
     assert dataclasses.is_dataclass(instance), f'No dataclass: {instance!r}'
 
-    document.add(tomlkit.nl())  # Add new line
-
     table = tomlkit.table()
     add_docstring(table, instance)
 
@@ -55,3 +53,12 @@ def dataclass2toml(instance) -> TOMLDocument:
             add_value(field_name=field_name, item=document, value=field_value)
 
     return document
+
+
+def dataclass2toml_str(instance) -> str:
+    """
+    Serialize a dataclass to a toml string.
+    """
+    document: TOMLDocument = dataclass2toml(instance=instance)
+    doc_str = tomlkit.dumps(document, sort_keys=False)
+    return doc_str.strip()

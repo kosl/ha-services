@@ -1,7 +1,7 @@
 from click._compat import strip_ansi as strip_ansi_codes
 from rich.console import Console
 
-from ha_services.cli_tools.richt_utils import PanelPrinter
+from ha_services.cli_tools.rich_utils import PanelPrinter
 
 
 def assert_in(content: str, parts: tuple[str, ...], strip_ansi=True) -> None:

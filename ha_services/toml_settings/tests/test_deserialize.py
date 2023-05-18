@@ -157,7 +157,6 @@ class DeserializeTestCase(TestCase):
 
                 [sub_class_two]
                 something = 123.456
-
                 [sub_class_three]
                 # SubClass3(one_value: bool = True)
                 one_value = true

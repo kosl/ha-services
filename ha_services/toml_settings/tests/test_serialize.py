@@ -5,7 +5,7 @@ from unittest import TestCase
 import tomlkit
 from tomlkit import TOMLDocument
 
-from ha_services.toml_settings.serialize import dataclass2toml
+from ha_services.toml_settings.serialize import dataclass2toml, dataclass2toml_str
 from ha_services.toml_settings.tests.fixtures import ComplexExample, PathExample, SimpleExample
 
 
@@ -18,6 +18,21 @@ class SerializeTestCase(TestCase):
         doc_str = tomlkit.dumps(document, sort_keys=False).rstrip()
         self.assertEqual(
             doc_str,
+            inspect.cleandoc(
+                '''
+                # A simple example
+                one = "foo"
+                two = "bar"
+                three = ""
+                number = 123
+                '''
+            ),
+        )
+
+    def test_dataclass2toml_str(self):
+        toml_str = dataclass2toml_str(instance=SimpleExample())
+        self.assertEqual(
+            toml_str,
             inspect.cleandoc(
                 '''
                 # A simple example

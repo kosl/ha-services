@@ -9,12 +9,12 @@ from rich.console import Console
 from tomlkit import TOMLDocument
 
 from ha_services.cli_tools.path_utils import backup, expand_user
-from ha_services.cli_tools.richt_utils import human_error
+from ha_services.cli_tools.rich_utils import human_error
 from ha_services.toml_settings.debug import print_dataclasses
 from ha_services.toml_settings.deserialize import toml2dataclass
 from ha_services.toml_settings.exceptions import UserSettingsNotFound
 from ha_services.toml_settings.sensible_editor import open_editor_for
-from ha_services.toml_settings.serialize import dataclass2toml
+from ha_services.toml_settings.serialize import dataclass2toml_str
 
 
 logger = logging.getLogger(__name__)
@@ -63,8 +63,7 @@ class TomlSettings:
     def open_in_editor(self) -> None:
         if not self.file_path.is_file():
             logger.info('Settings file "%s" not exist -> create default', self.file_path)
-            document: TOMLDocument = dataclass2toml(instance=self.settings_dataclass)
-            doc_str = tomlkit.dumps(document, sort_keys=False)
+            doc_str = dataclass2toml_str(instance=self.settings_dataclass)
             self.file_path.write_text(doc_str, encoding='UTF-8')
 
         open_editor_for(self.file_path)

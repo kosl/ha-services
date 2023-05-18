@@ -6,7 +6,7 @@ from rich import print  # noqa
 from rich.console import Console
 from rich.highlighter import ReprHighlighter
 
-from ha_services.cli_tools.richt_utils import PanelPrinter, human_error, print_code, print_unified_diff
+from ha_services.cli_tools.rich_utils import PanelPrinter, human_error, print_code, print_unified_diff
 from ha_services.systemd.data_classes import BaseSystemdServiceInfo
 
 
