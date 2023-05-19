@@ -16,6 +16,7 @@ from rich_click import RichGroup
 
 import ha_services
 from ha_services import constants
+from ha_services.cli_tools.verbosity import OPTION_KWARGS_VERBOSE
 
 
 logger = logging.getLogger(__name__)
@@ -59,26 +60,26 @@ def cli():
 
 
 @click.command()
-@click.option('--verbose/--no-verbose', **OPTION_ARGS_DEFAULT_FALSE)
-def mypy(verbose: bool = True):
+@click.option('-v', '--verbosity', **OPTION_KWARGS_VERBOSE)
+def mypy(verbosity: int):
     """Run Mypy (configured in pyproject.toml)"""
-    verbose_check_call('mypy', '.', cwd=PACKAGE_ROOT, verbose=verbose, exit_on_error=True)
+    verbose_check_call('mypy', '.', cwd=PACKAGE_ROOT, verbosity=verbosity, exit_on_error=True)
 
 
 cli.add_command(mypy)
 
 
 @click.command()
-@click.option('--verbose/--no-verbose', **OPTION_ARGS_DEFAULT_FALSE)
-def coverage(verbose: bool = True):
+@click.option('-v', '--verbosity', **OPTION_KWARGS_VERBOSE)
+def coverage(verbosity: int):
     """
     Run and show coverage.
     """
-    verbose_check_call('coverage', 'run', verbose=verbose, exit_on_error=True)
-    verbose_check_call('coverage', 'combine', '--append', verbose=verbose, exit_on_error=True)
-    verbose_check_call('coverage', 'report', '--fail-under=30', verbose=verbose, exit_on_error=True)
-    verbose_check_call('coverage', 'xml', verbose=verbose, exit_on_error=True)
-    verbose_check_call('coverage', 'json', verbose=verbose, exit_on_error=True)
+    verbose_check_call('coverage', 'run', verbosity=verbosity, exit_on_error=True)
+    verbose_check_call('coverage', 'combine', '--append', verbosity=verbosity, exit_on_error=True)
+    verbose_check_call('coverage', 'report', '--fail-under=30', verbosity=verbosity, exit_on_error=True)
+    verbose_check_call('coverage', 'xml', verbosity=verbosity, exit_on_error=True)
+    verbose_check_call('coverage', 'json', verbosity=verbosity, exit_on_error=True)
 
 
 cli.add_command(coverage)
@@ -177,12 +178,12 @@ cli.add_command(publish)
 
 @click.command()
 @click.option('--color/--no-color', **OPTION_ARGS_DEFAULT_TRUE)
-@click.option('--verbose/--no-verbose', **OPTION_ARGS_DEFAULT_FALSE)
-def fix_code_style(color: bool = True, verbose: bool = False):
+@click.option('-v', '--verbosity', **OPTION_KWARGS_VERBOSE)
+def fix_code_style(color: bool, verbosity: int):
     """
     Fix code style of all ha_services source code files via darker
     """
-    code_style.fix(package_root=PACKAGE_ROOT, color=color, verbose=verbose)
+    code_style.fix(package_root=PACKAGE_ROOT, color=color, verbose=verbosity > 0)
 
 
 cli.add_command(fix_code_style)
@@ -190,12 +191,12 @@ cli.add_command(fix_code_style)
 
 @click.command()
 @click.option('--color/--no-color', **OPTION_ARGS_DEFAULT_TRUE)
-@click.option('--verbose/--no-verbose', **OPTION_ARGS_DEFAULT_FALSE)
-def check_code_style(color: bool = True, verbose: bool = False):
+@click.option('-v', '--verbosity', **OPTION_KWARGS_VERBOSE)
+def check_code_style(color: bool, verbosity: int):
     """
     Check code style by calling darker + flake8
     """
-    code_style.check(package_root=PACKAGE_ROOT, color=color, verbose=verbose)
+    code_style.check(package_root=PACKAGE_ROOT, color=color, verbose=verbosity > 0)
 
 
 cli.add_command(check_code_style)
