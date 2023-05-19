@@ -16,6 +16,7 @@ from rich_click import RichGroup
 
 import ha_services
 from ha_services import constants
+from ha_services.cli_tools.dev_tools import _run_tox, _run_unittest_cli
 from ha_services.cli_tools.verbosity import OPTION_KWARGS_VERBOSE
 
 
@@ -63,7 +64,7 @@ def cli():
 @click.option('-v', '--verbosity', **OPTION_KWARGS_VERBOSE)
 def mypy(verbosity: int):
     """Run Mypy (configured in pyproject.toml)"""
-    verbose_check_call('mypy', '.', cwd=PACKAGE_ROOT, verbosity=verbosity, exit_on_error=True)
+    verbose_check_call('mypy', '.', cwd=PACKAGE_ROOT, verbose=verbosity > 0, exit_on_error=True)
 
 
 cli.add_command(mypy)
@@ -75,11 +76,11 @@ def coverage(verbosity: int):
     """
     Run and show coverage.
     """
-    verbose_check_call('coverage', 'run', verbosity=verbosity, exit_on_error=True)
-    verbose_check_call('coverage', 'combine', '--append', verbosity=verbosity, exit_on_error=True)
-    verbose_check_call('coverage', 'report', '--fail-under=30', verbosity=verbosity, exit_on_error=True)
-    verbose_check_call('coverage', 'xml', verbosity=verbosity, exit_on_error=True)
-    verbose_check_call('coverage', 'json', verbosity=verbosity, exit_on_error=True)
+    verbose_check_call('coverage', 'run', verbose=verbosity > 0, exit_on_error=True)
+    verbose_check_call('coverage', 'combine', '--append', verbose=verbosity > 0, exit_on_error=True)
+    verbose_check_call('coverage', 'report', '--fail-under=30', verbose=verbosity > 0, exit_on_error=True)
+    verbose_check_call('coverage', 'xml', verbose=verbosity > 0, exit_on_error=True)
+    verbose_check_call('coverage', 'json', verbose=verbosity > 0, exit_on_error=True)
 
 
 cli.add_command(coverage)
@@ -233,39 +234,6 @@ def update_test_snapshot_files():
 cli.add_command(update_test_snapshot_files)
 
 
-def _run_unittest_cli(extra_env=None, verbose=True, exit_after_run=True):
-    """
-    Call the origin unittest CLI and pass all args to it.
-    """
-    if extra_env is None:
-        extra_env = dict()
-
-    extra_env.update(
-        dict(
-            PYTHONUNBUFFERED='1',
-            PYTHONWARNINGS='always',
-        )
-    )
-
-    args = sys.argv[2:]
-    if not args:
-        if verbose:
-            args = ('--verbose', '--locals', '--buffer')
-        else:
-            args = ('--locals', '--buffer')
-
-    verbose_check_call(
-        sys.executable,
-        '-m',
-        'unittest',
-        *args,
-        timeout=15 * 60,
-        extra_env=extra_env,
-    )
-    if exit_after_run:
-        sys.exit(0)
-
-
 @click.command()  # Dummy command
 def test():
     """
@@ -275,11 +243,6 @@ def test():
 
 
 cli.add_command(test)
-
-
-def _run_tox():
-    verbose_check_call(sys.executable, '-m', 'tox', *sys.argv[2:])
-    sys.exit(0)
 
 
 @click.command()  # Dummy "tox" command
