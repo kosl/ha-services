@@ -61,13 +61,13 @@ class DemoSettings:
     app: dataclasses = dataclasses.field(default_factory=MqttExampleValues)
 
 
-def publish_forever(*, user_settings: DemoSettings, verbose):
+def publish_forever(*, user_settings: DemoSettings, verbosity: int):
     """
     Publish "something" to MQTT server. It's just a DEMO ;)
     """
     publisher = HaMqttPublisher(
         settings=user_settings.mqtt,
-        verbose=verbose,
+        verbosity=verbosity,
         config_count=1,  # Send every time the config
     )
 

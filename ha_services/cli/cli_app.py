@@ -15,8 +15,8 @@ from rich_click import RichGroup
 
 import ha_services
 from ha_services import __version__, constants
+from ha_services.cli_tools.verbosity import OPTION_KWARGS_VERBOSE, setup_logging
 from ha_services.example import DemoSettings, SystemdServiceInfo, publish_forever
-from ha_services.log_setup import basic_log_setup
 from ha_services.mqtt4homeassistant.data_classes import MqttSettings
 from ha_services.mqtt4homeassistant.mqtt import get_connected_client
 from ha_services.systemd.api import ServiceControl
@@ -80,12 +80,12 @@ SETTINGS_FILE_NAME = 'ha-services-demo'
 
 
 @click.command()
-@click.option('--debug/--no-debug', **OPTION_ARGS_DEFAULT_TRUE)
-def edit_settings(debug):
+@click.option('-v', '--verbosity', **OPTION_KWARGS_VERBOSE)
+def edit_settings(verbosity: int):
     """
     Edit the settings file. On first call: Create the default one.
     """
-    basic_log_setup(debug=debug)
+    setup_logging(verbosity=verbosity)
     TomlSettings(
         dir_name=SETTINGS_DIR_NAME,
         file_name=SETTINGS_FILE_NAME,
@@ -97,12 +97,12 @@ cli.add_command(edit_settings)
 
 
 @click.command()
-@click.option('--debug/--no-debug', **OPTION_ARGS_DEFAULT_TRUE)
-def print_settings(debug):
+@click.option('-v', '--verbosity', **OPTION_KWARGS_VERBOSE)
+def print_settings(verbosity: int):
     """
     Display (anonymized) MQTT server username and password
     """
-    basic_log_setup(debug=debug)
+    setup_logging(verbosity=verbosity)
     TomlSettings(
         dir_name=SETTINGS_DIR_NAME,
         file_name=SETTINGS_FILE_NAME,
@@ -118,12 +118,12 @@ cli.add_command(print_settings)
 
 
 @click.command()
-@click.option('--debug/--no-debug', **OPTION_ARGS_DEFAULT_TRUE)
-def systemd_debug(debug):
+@click.option('-v', '--verbosity', **OPTION_KWARGS_VERBOSE)
+def systemd_debug(verbosity: int):
     """
     Print Systemd service template + context + rendered file content.
     """
-    basic_log_setup(debug=debug)
+    setup_logging(verbosity=verbosity)
     toml_settings = TomlSettings(
         dir_name=SETTINGS_DIR_NAME,
         file_name=SETTINGS_FILE_NAME,
@@ -139,12 +139,12 @@ cli.add_command(systemd_debug)
 
 
 @click.command()
-@click.option('--debug/--no-debug', **OPTION_ARGS_DEFAULT_TRUE)
-def systemd_setup(debug):
+@click.option('-v', '--verbosity', **OPTION_KWARGS_VERBOSE)
+def systemd_setup(verbosity: int):
     """
     Write Systemd service file, enable it and (re-)start the service. (May need sudo)
     """
-    basic_log_setup(debug=debug)
+    setup_logging(verbosity=verbosity)
     toml_settings = TomlSettings(
         dir_name=SETTINGS_DIR_NAME,
         file_name=SETTINGS_FILE_NAME,
@@ -160,12 +160,12 @@ cli.add_command(systemd_setup)
 
 
 @click.command()
-@click.option('--debug/--no-debug', **OPTION_ARGS_DEFAULT_TRUE)
-def systemd_remove(debug):
+@click.option('-v', '--verbosity', **OPTION_KWARGS_VERBOSE)
+def systemd_remove(verbosity: int):
     """
     Write Systemd service file, enable it and (re-)start the service. (May need sudo)
     """
-    basic_log_setup(debug=debug)
+    setup_logging(verbosity=verbosity)
     toml_settings = TomlSettings(
         dir_name=SETTINGS_DIR_NAME,
         file_name=SETTINGS_FILE_NAME,
@@ -181,12 +181,12 @@ cli.add_command(systemd_remove)
 
 
 @click.command()
-@click.option('--debug/--no-debug', **OPTION_ARGS_DEFAULT_TRUE)
-def systemd_status(debug):
+@click.option('-v', '--verbosity', **OPTION_KWARGS_VERBOSE)
+def systemd_status(verbosity: int):
     """
     Display status of systemd service. (May need sudo)
     """
-    basic_log_setup(debug=debug)
+    setup_logging(verbosity=verbosity)
     toml_settings = TomlSettings(
         dir_name=SETTINGS_DIR_NAME,
         file_name=SETTINGS_FILE_NAME,
@@ -202,12 +202,12 @@ cli.add_command(systemd_status)
 
 
 @click.command()
-@click.option('--debug/--no-debug', **OPTION_ARGS_DEFAULT_TRUE)
-def systemd_stop(debug):
+@click.option('-v', '--verbosity', **OPTION_KWARGS_VERBOSE)
+def systemd_stop(verbosity: int):
     """
     Stops the systemd service. (May need sudo)
     """
-    basic_log_setup(debug=debug)
+    setup_logging(verbosity=verbosity)
     toml_settings = TomlSettings(
         dir_name=SETTINGS_DIR_NAME,
         file_name=SETTINGS_FILE_NAME,
@@ -226,12 +226,12 @@ cli.add_command(systemd_stop)
 
 
 @click.command()
-@click.option('--debug/--no-debug', **OPTION_ARGS_DEFAULT_FALSE)
-def test_mqtt_connection(debug):
+@click.option('-v', '--verbosity', **OPTION_KWARGS_VERBOSE)
+def test_mqtt_connection(verbosity: int):
     """
     Test connection to MQTT Server
     """
-    basic_log_setup(debug=debug)
+    setup_logging(verbosity=verbosity)
     toml_settings = TomlSettings(
         dir_name=SETTINGS_DIR_NAME,
         file_name=SETTINGS_FILE_NAME,
@@ -251,13 +251,12 @@ cli.add_command(test_mqtt_connection)
 
 
 @click.command()
-@click.option('--verbose/--no-verbose', **OPTION_ARGS_DEFAULT_TRUE)
-@click.option('--debug/--no-debug', **OPTION_ARGS_DEFAULT_FALSE)
-def publish_loop(verbose, debug):
+@click.option('-v', '--verbosity', **OPTION_KWARGS_VERBOSE)
+def publish_loop(verbosity: int):
     """
     Publish data via MQTT for Home Assistant (endless loop)
     """
-    basic_log_setup(debug=debug)
+    setup_logging(verbosity=verbosity)
     toml_settings = TomlSettings(
         dir_name=SETTINGS_DIR_NAME,
         file_name=SETTINGS_FILE_NAME,
@@ -266,7 +265,7 @@ def publish_loop(verbose, debug):
     user_settings: DemoSettings = toml_settings.get_user_settings(debug=True)
 
     try:
-        publish_forever(user_settings=user_settings, verbose=verbose)
+        publish_forever(user_settings=user_settings, verbosity=verbosity)
     except KeyboardInterrupt:
         print('Bye, bye')
 
