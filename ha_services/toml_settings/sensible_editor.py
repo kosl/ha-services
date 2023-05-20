@@ -1,6 +1,9 @@
 import logging
 import shutil
 import subprocess
+import sys
+
+from rich import print  # noqa
 
 
 logger = logging.getLogger(__name__)
@@ -21,7 +24,7 @@ def open_editor_for(file_path):
     """
     for command in COMMANDS:
         if bin := shutil.which(command):
-            logger.debug('Call: "%s %s"', bin, file_path)
+            logger.info('Call: "%s %s"', bin, file_path)
             try:
                 return subprocess.check_call([bin, file_path])
             except subprocess.SubprocessError as err:
@@ -29,4 +32,6 @@ def open_editor_for(file_path):
         else:
             logger.debug(f'No "{command}" found.')
 
-    print(f'Error not editor found to open {file_path}!')
+    print(f'[red]Error: No way found to open "{file_path}" !')
+    print(f'(Tried: {", ".join(COMMANDS)})')
+    sys.exit(1)
