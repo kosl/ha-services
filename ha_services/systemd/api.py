@@ -13,8 +13,13 @@ from ha_services.systemd.data_classes import BaseSystemdServiceInfo
 logger = logging.getLogger(__name__)
 
 
-class SystemdServiceError(RuntimeError):
-    pass
+def exit_if_systemd_not_available(info: BaseSystemdServiceInfo):
+    if not info.systemd_available:
+        human_error(
+            f'Systemd not available, because path not exists: {info.systemd_base_path}',
+            title='[red]No Systemd',
+            exit_code=1,
+        )
 
 
 class ServiceControl:
@@ -39,6 +44,8 @@ class ServiceControl:
 
     def write_service_file(self):
         print(f'Write "{self.info.service_file_path}"...')
+        exit_if_systemd_not_available(self.info)
+
         content = self.info.get_compiled_service()
         try:
             self.info.service_file_path.write_text(content, encoding='UTF-8')
@@ -49,6 +56,8 @@ class ServiceControl:
 
     def remove_service_file(self):
         print(f'Remove "{self.info.service_file_path}"...')
+        exit_if_systemd_not_available(self.info)
+
         try:
             self.info.service_file_path.unlink(missing_ok=True)
         except PermissionError as err:
@@ -58,6 +67,8 @@ class ServiceControl:
 
     def service_file_is_up2date(self, print_warning: bool = True, print_diff: bool = False, console=None):
         logger.debug('Read %s...', self.info.service_file_path)
+        exit_if_systemd_not_available(self.info)
+
         try:
             got_content = self.info.service_file_path.read_text(encoding='UTF-8')
         except PermissionError as err:
@@ -93,6 +104,8 @@ class ServiceControl:
     # systemctl
 
     def call_systemctl(self, command, with_service_name=True, exit_on_error=True):
+        exit_if_systemd_not_available(self.info)
+
         args = ['systemctl', command]
         if with_service_name:
             args.append(self.service_name)

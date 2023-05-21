@@ -32,3 +32,7 @@ class SystemdDataClassesTestCase(TestCase):
             assert str(info.template_context.work_dir).startswith(
                 base_temp_dir
             ), f'{info.template_context.work_dir} does not start with {base_temp_dir}'
+
+    def test_no_systemd(self):
+        info = SystemdServiceInfo(systemd_base_path=Path('/no/systemd/on/this/system'))
+        self.assertIs(info.systemd_available, False)
