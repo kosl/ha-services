@@ -1,4 +1,5 @@
 import dataclasses
+import logging
 from pathlib import Path
 from string import Template
 
@@ -14,6 +15,9 @@ from ha_services.systemd.defaults import (
     get_work_directory,
 )
 from ha_services.systemd.template import InvalidTemplate, validate_template
+
+
+logger = logging.getLogger(__name__)
 
 
 @dataclasses.dataclass
@@ -51,9 +55,11 @@ class BaseSystemdServiceInfo:
     service_file_path: Path = None
 
     def __post_init__(self):
-        assert_is_dir(self.systemd_base_path)
         assert_is_dir(self.template_context.work_dir)
         assert_is_file(self.template_path)
+
+        if not self.systemd_base_path.exists():
+            logger.warning('Systemd not available, because path not exists: %s', self.systemd_base_path)
 
         if not self.service_slug:
             self.service_slug = slugify(self.template_context.verbose_service_name, sep='_').lower()
@@ -71,6 +77,10 @@ class BaseSystemdServiceInfo:
                 title='[red]invalid Systemd template',
                 exception=err,
             )
+
+    @property
+    def systemd_available(self):
+        return self.systemd_base_path.exists()
 
     def get_template_content(self) -> str:
         """
