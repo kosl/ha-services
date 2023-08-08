@@ -5,6 +5,7 @@ from pathlib import Path
 import tomlkit
 from tomlkit import TOMLDocument
 
+from ha_services.cli_tools.path_utils import expand_user
 from ha_services.toml_settings.data_class_utils import iter_dataclass
 from ha_services.toml_settings.serialize import add_dataclass
 
@@ -63,7 +64,9 @@ def toml2dataclass(*, document: TOMLDocument, instance, _changed=False) -> bool:
                 document[field_name] = field_value  # Add default one
                 _changed = True
             else:
-                setattr(instance, field_name, Path(value))
+                path_value = Path(value)
+                path_value = expand_user(path_value)  # Use user ~ even if called via sudo
+                setattr(instance, field_name, path_value)
         elif not isinstance(field_value, type(doc_value.unwrap())):
             logger.error(
                 'Toml value %s=%r is type %r but must be type %r -> ignored and use default value!',
