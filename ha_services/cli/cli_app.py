@@ -284,7 +284,7 @@ def main():
         width=console.size.width,  # full terminal width
         show_locals=True,
         suppress=[click, rich_click],
-        max_frames=2,
+        max_frames=8,
     )
 
     # Execute Click CLI:
