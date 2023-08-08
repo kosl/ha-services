@@ -6,6 +6,7 @@ from unittest import TestCase
 
 import tomlkit
 
+from ha_services.cli_tools.test_utils.environment_fixtures import AsSudoCallOverrideEnviron
 from ha_services.toml_settings.deserialize import toml2dataclass
 from ha_services.toml_settings.tests.fixtures import ComplexExample, PathExample, SimpleExample
 
@@ -103,6 +104,18 @@ class DeserializeTestCase(TestCase):
                 'path': Path('/to/some/other/place'),
             },
         )
+
+        # Path entries can use "~":
+        real_home = Path().home()
+        toml2dataclass(document=tomlkit.loads('path = "~/foo/"'), instance=instance)
+        self.assertEqual(instance.path, real_home / 'foo')
+
+        # sudo calls will be also use the user home and not /root/
+
+        with AsSudoCallOverrideEnviron():
+            self.assertEqual(Path('~').expanduser(), Path('/root'))
+            toml2dataclass(document=tomlkit.loads('path = "~/bar/"'), instance=instance)
+            self.assertEqual(instance.path, real_home / 'bar')
 
     def test_toml2dataclass_inheritance(self):
         instance = ComplexExample()
