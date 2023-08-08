@@ -1,12 +1,13 @@
 import logging
 from subprocess import CalledProcessError
 
-from manageprojects.utilities.subprocess_utils import verbose_check_call
+
 from rich import print  # noqa
 from rich.console import Console
 from rich.highlighter import ReprHighlighter
 
 from ha_services.cli_tools.rich_utils import PanelPrinter, human_error, print_code, print_unified_diff
+from ha_services.cli_tools.subprocess_utils import verbose_check_call
 from ha_services.systemd.data_classes import BaseSystemdServiceInfo
 
 
