@@ -4,12 +4,12 @@ import os
 import resource
 import time
 
+from cli_base.systemd.data_classes import BaseSystemdServiceInfo, BaseSystemdServiceTemplateContext
 from rich import print  # noqa
 
 from ha_services.mqtt4homeassistant.converter import values2mqtt_payload
 from ha_services.mqtt4homeassistant.data_classes import HaValue, HaValues, MqttSettings
 from ha_services.mqtt4homeassistant.mqtt import HaMqttPublisher
-from ha_services.systemd.data_classes import BaseSystemdServiceInfo, BaseSystemdServiceTemplateContext
 
 
 logger = logging.getLogger(__name__)

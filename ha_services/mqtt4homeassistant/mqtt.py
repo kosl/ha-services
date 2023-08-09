@@ -4,11 +4,11 @@ import socket
 
 import paho.mqtt.client as mqtt
 from bx_py_utils.anonymize import anonymize
+from cli_base.cli_tools.rich_utils import human_error
 from rich import print
 from rich.pretty import pprint
 
 from ha_services import __version__
-from ha_services.cli_tools.rich_utils import human_error
 from ha_services.mqtt4homeassistant.data_classes import HaMqttPayload, MqttSettings
 
 

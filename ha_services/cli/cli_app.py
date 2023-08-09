@@ -8,6 +8,9 @@ from pathlib import Path
 import rich_click
 import rich_click as click
 from bx_py_utils.path import assert_is_file
+from cli_base.cli_tools.verbosity import OPTION_KWARGS_VERBOSE, setup_logging
+from cli_base.systemd.api import ServiceControl
+from cli_base.toml_settings.api import TomlSettings
 from rich import print  # noqa
 from rich.console import Console
 from rich.traceback import install as rich_traceback_install
@@ -15,12 +18,9 @@ from rich_click import RichGroup
 
 import ha_services
 from ha_services import __version__, constants
-from ha_services.cli_tools.verbosity import OPTION_KWARGS_VERBOSE, setup_logging
 from ha_services.example import DemoSettings, SystemdServiceInfo, publish_forever
 from ha_services.mqtt4homeassistant.data_classes import MqttSettings
 from ha_services.mqtt4homeassistant.mqtt import get_connected_client
-from ha_services.systemd.api import ServiceControl
-from ha_services.toml_settings.api import TomlSettings
 
 
 logger = logging.getLogger(__name__)
@@ -240,7 +240,7 @@ def test_mqtt_connection(verbosity: int):
     user_settings: DemoSettings = toml_settings.get_user_settings(debug=True)
 
     settings: MqttSettings = user_settings.mqtt
-    mqttc = get_connected_client(settings=settings, verbose=True)
+    mqttc = get_connected_client(settings=settings, verbosity=verbosity)
     mqttc.loop_start()
     mqttc.loop_stop()
     mqttc.disconnect()

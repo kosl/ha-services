@@ -1,18 +1,18 @@
-from manageprojects.tests.base import BaseTestCase
-
-from ha_services import constants
-from ha_services.cli.cli_app import SETTINGS_DIR_NAME, SETTINGS_FILE_NAME
-from ha_services.cli.dev import PACKAGE_ROOT
-from ha_services.cli_tools.test_utils.assertion import assert_in
-from ha_services.cli_tools.test_utils.cli_readme import AssertCliHelpInReadme
-from ha_services.cli_tools.test_utils.rich_test_utils import (
+from cli_base.cli_tools.test_utils.assertion import assert_in
+from cli_base.cli_tools.test_utils.cli_readme import AssertCliHelpInReadme
+from cli_base.cli_tools.test_utils.rich_test_utils import (
     assert_no_color_env,
     assert_rich_click_no_color,
     assert_rich_no_color,
     assert_subprocess_rich_diagnose_no_color,
 )
+from cli_base.toml_settings.test_utils.cli_mock import TomlSettingsCliMock
+from manageprojects.tests.base import BaseTestCase
+
+from ha_services import constants
+from ha_services.cli.cli_app import SETTINGS_DIR_NAME, SETTINGS_FILE_NAME
+from ha_services.cli.dev import PACKAGE_ROOT
 from ha_services.example import DemoSettings
-from ha_services.toml_settings.test_utils.cli_mock import TomlSettingsCliMock
 
 
 TERM_WIDTH = 100
