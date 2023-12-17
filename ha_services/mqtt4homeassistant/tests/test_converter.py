@@ -52,5 +52,5 @@ class ConverterTestCase(TestCase):
 
     def test_check_prefix(self):
         with self.assertRaises(AssertionError) as err:
-            values2mqtt_payload(values=None, name_prefix='1foobar'),
+            values2mqtt_payload(values=None, name_prefix='1foobar')
         self.assertIn('Invalid: name_prefix', str(err.exception))
