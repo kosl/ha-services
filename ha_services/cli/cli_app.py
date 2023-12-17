@@ -9,6 +9,7 @@ import rich_click
 import rich_click as click
 from bx_py_utils.path import assert_is_file
 from cli_base.cli_tools.verbosity import OPTION_KWARGS_VERBOSE, setup_logging
+from cli_base.cli_tools.version_info import print_version
 from cli_base.systemd.api import ServiceControl
 from cli_base.toml_settings.api import TomlSettings
 from rich import print  # noqa
@@ -17,7 +18,7 @@ from rich.traceback import install as rich_traceback_install
 from rich_click import RichGroup
 
 import ha_services
-from ha_services import __version__, constants
+from ha_services import constants
 from ha_services.example import DemoSettings, SystemdServiceInfo, publish_forever
 from ha_services.mqtt4homeassistant.data_classes import MqttSettings
 from ha_services.mqtt4homeassistant.mqtt import get_connected_client
@@ -277,14 +278,14 @@ cli.add_command(publish_loop)
 
 
 def main():
-    print(f'[bold][green]ha-services[/green] DEMO cli v[cyan]{__version__}')
+    print_version(ha_services)
 
     console = Console()
     rich_traceback_install(
         width=console.size.width,  # full terminal width
         show_locals=True,
-        suppress=[click, rich_click],
-        max_frames=8,
+        suppress=[click],
+        max_frames=2,
     )
 
     # Execute Click CLI:

@@ -7,13 +7,15 @@ from pathlib import Path
 
 import rich_click as click
 from bx_py_utils.path import assert_is_file
-from cli_base.cli_tools.dev_tools import run_tox, run_unittest_cli
+from cli_base.cli_tools import code_style
+from cli_base.cli_tools.dev_tools import run_coverage, run_tox, run_unittest_cli
 from cli_base.cli_tools.subprocess_utils import verbose_check_call
+from cli_base.cli_tools.test_utils.snapshot import UpdateTestSnapshotFiles
 from cli_base.cli_tools.verbosity import OPTION_KWARGS_VERBOSE
-from manageprojects.utilities import code_style
+from cli_base.cli_tools.version_info import print_version
 from manageprojects.utilities.publish import publish_package
-from manageprojects.utilities.version_info import print_version
-from rich import print  # noqa; noqa
+from rich.console import Console
+from rich.traceback import install as rich_traceback_install
 from rich_click import RichGroup
 
 import ha_services
@@ -71,22 +73,6 @@ cli.add_command(mypy)
 
 
 @click.command()
-@click.option('-v', '--verbosity', **OPTION_KWARGS_VERBOSE)
-def coverage(verbosity: int):
-    """
-    Run and show coverage.
-    """
-    verbose_check_call('coverage', 'run', verbose=verbosity > 0, exit_on_error=True)
-    verbose_check_call('coverage', 'combine', '--append', verbose=verbosity > 0, exit_on_error=True)
-    verbose_check_call('coverage', 'report', '--fail-under=30', verbose=verbosity > 0, exit_on_error=True)
-    verbose_check_call('coverage', 'xml', verbose=verbosity > 0, exit_on_error=True)
-    verbose_check_call('coverage', 'json', verbose=verbosity > 0, exit_on_error=True)
-
-
-cli.add_command(coverage)
-
-
-@click.command()
 def install():
     """
     Run pip-sync and install 'ha_services' via pip as editable.
@@ -120,7 +106,7 @@ def update():
     verbose_check_call(bin_path / 'pip', 'install', '-U', 'pip-tools')
 
     extra_env = dict(
-        CUSTOM_COMPILE_COMMAND='./cli.py update',
+        CUSTOM_COMPILE_COMMAND='./dev-cli.py update',
     )
 
     pip_compile_base = [
@@ -184,7 +170,7 @@ def fix_code_style(color: bool, verbosity: int):
     """
     Fix code style of all ha_services source code files via darker
     """
-    code_style.fix(package_root=PACKAGE_ROOT, color=color, verbose=verbosity > 0)
+    code_style.fix(package_root=PACKAGE_ROOT, darker_color=color, darker_verbose=verbosity > 0)
 
 
 cli.add_command(fix_code_style)
@@ -197,38 +183,28 @@ def check_code_style(color: bool, verbosity: int):
     """
     Check code style by calling darker + flake8
     """
-    code_style.check(package_root=PACKAGE_ROOT, color=color, verbose=verbosity > 0)
+    code_style.check(package_root=PACKAGE_ROOT, darker_color=color, darker_verbose=verbosity > 0)
 
 
 cli.add_command(check_code_style)
 
 
 @click.command()
-def update_test_snapshot_files():
+@click.option('-v', '--verbosity', **OPTION_KWARGS_VERBOSE)
+def update_test_snapshot_files(verbosity: int):
     """
     Update all test snapshot files (by remove and recreate all snapshot files)
     """
 
-    def iter_snapshot_files():
-        yield from PACKAGE_ROOT.rglob('*.snapshot.*')
-
-    removed_file_count = 0
-    for item in iter_snapshot_files():
-        item.unlink()
-        removed_file_count += 1
-    print(f'{removed_file_count} test snapshot files removed... run tests...')
-
-    # Just recreate them by running tests:
-    run_unittest_cli(
-        extra_env=dict(
-            RAISE_SNAPSHOT_ERRORS='0',  # Recreate snapshot files without error
-        ),
-        verbose=False,
-        exit_after_run=False,
-    )
-
-    new_files = len(list(iter_snapshot_files()))
-    print(f'{new_files} test snapshot files created, ok.\n')
+    with UpdateTestSnapshotFiles(root_path=PACKAGE_ROOT, verbose=verbosity > 0):
+        # Just recreate them by running tests:
+        run_unittest_cli(
+            extra_env=dict(
+                RAISE_SNAPSHOT_ERRORS='0',  # Recreate snapshot files without error
+            ),
+            verbose=verbosity > 1,
+            exit_after_run=False,
+        )
 
 
 cli.add_command(update_test_snapshot_files)
@@ -243,6 +219,17 @@ def test():
 
 
 cli.add_command(test)
+
+
+@click.command()  # Dummy command
+def coverage():
+    """
+    Run tests and show coverage report.
+    """
+    run_coverage()
+
+
+cli.add_command(coverage)
 
 
 @click.command()  # Dummy "tox" command
@@ -269,13 +256,24 @@ cli.add_command(version)
 def main():
     print_version(ha_services)
 
+    console = Console()
+    rich_traceback_install(
+        width=console.size.width,  # full terminal width
+        show_locals=True,
+        suppress=[click],
+        max_frames=2,
+    )
+
     if len(sys.argv) >= 2:
-        # Check if we just pass a command call
+        # Check if we can just pass a command call to origin CLI:
         command = sys.argv[1]
-        if command == 'test':
-            run_unittest_cli()
-        elif command == 'tox':
-            run_tox()
+        command_map = {
+            'test': run_unittest_cli,
+            'tox': run_tox,
+            'coverage': run_coverage,
+        }
+        if real_func := command_map.get(command):
+            real_func(argv=sys.argv, exit_after_run=True)
 
     # Execute Click CLI:
     cli()
