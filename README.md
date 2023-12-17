@@ -31,7 +31,7 @@ Usage: ./dev-cli.py [OPTIONS] COMMAND [ARGS]...
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
 ╭─ Commands ───────────────────────────────────────────────────────────────────────────────────────╮
 │ check-code-style            Check code style by calling darker + flake8                          │
-│ coverage                    Run and show coverage.                                               │
+│ coverage                    Run tests and show coverage report.                                  │
 │ fix-code-style              Fix code style of all ha_services source code files via darker       │
 │ install                     Run pip-sync and install 'ha_services' via pip as editable.          │
 │ mypy                        Run Mypy (configured in pyproject.toml)                              │
