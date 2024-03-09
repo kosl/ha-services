@@ -25,17 +25,17 @@ class OnConnectCallback:
     def __init__(self, verbosity: int):
         self.verbosity = verbosity
 
-    def __call__(self, client, userdata, flags, rc):
+    def __call__(self, client, userdata, flags, reason_code, properties):
         if self.verbosity:
-            print(f'MQTT broker connect result code: {rc}', end=' ')
+            print(f'MQTT broker connect {reason_code=}', end=' ')
 
-        if rc == 0:
+        if reason_code == 0:
             if self.verbosity:
                 print('[green]OK')
         else:
             print('\n[red]MQTT Connection not successful!')
             print('[yellow]Please check your credentials\n')
-            raise RuntimeError(f'MQTT connection result code {rc} is not 0')
+            raise RuntimeError(f'MQTT connection {reason_code=} is not 0')
 
         if self.verbosity:
             print(f'\t{userdata=}')
@@ -64,7 +64,10 @@ def get_connected_client(settings: MqttSettings, verbosity: int, timeout=10):
         elif verbosity:
             print('Host/port test [green]OK')
 
-    mqttc = mqtt.Client(client_id=client_id)
+    mqttc = mqtt.Client(
+        mqtt.CallbackAPIVersion.VERSION2,
+        client_id=client_id,
+    )
     mqttc.on_connect = OnConnectCallback(verbosity=verbosity)
     mqttc.enable_logger(logger=logger)
 
