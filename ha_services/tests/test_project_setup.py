@@ -7,7 +7,7 @@ from manageprojects.test_utils.project_setup import check_editor_config, get_py_
 from packaging.version import Version
 
 from ha_services import __version__
-from ha_services.cli.cli_app import PACKAGE_ROOT
+from ha_services.cli.dev import PACKAGE_ROOT
 
 
 class ProjectSetupTestCase(TestCase):
