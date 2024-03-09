@@ -17,16 +17,24 @@ from manageprojects.utilities.publish import publish_package
 from rich.console import Console
 from rich.traceback import install as rich_traceback_install
 from rich_click import RichGroup
+from typeguard import install_import_hook
 
 import ha_services
 from ha_services import constants
+from ha_services.constants import BASE_PATH
+
+
+# Check type annotations via typeguard in all tests.
+# Sadly we must activate this here and can't do this in ./tests/__init__.py
+install_import_hook(packages=('ha_services',))
 
 
 logger = logging.getLogger(__name__)
 
 
-PACKAGE_ROOT = Path(ha_services.__file__).parent.parent
-assert_is_file(PACKAGE_ROOT / 'pyproject.toml')
+PACKAGE_ROOT = BASE_PATH.parent
+assert_is_file(PACKAGE_ROOT / 'pyproject.toml')  # Exists only in cloned git repo
+
 
 OPTION_ARGS_DEFAULT_TRUE = dict(is_flag=True, show_default=True, default=True)
 OPTION_ARGS_DEFAULT_FALSE = dict(is_flag=True, show_default=True, default=False)
