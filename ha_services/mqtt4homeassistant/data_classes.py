@@ -9,15 +9,15 @@ from bx_py_utils.anonymize import anonymize
 class HaValue:
     name: str
     value: int | float | str
-    device_class: str  # e.g.: "voltage" / "current" / "energy" etc.
-    state_class: str  # e.g.: "measurement" / "total" / "total_increasing" etc.
-    unit: str | None  # e.g.: "V" / "A" / "kWh" etc.
+    device_class: str | None = None  # e.g.: "voltage" / "current" / "energy" etc.
+    state_class: str | None = None  # e.g.: "measurement" / "total" / "total_increasing" etc.
+    unit: str | None = None  # e.g.: "V" / "A" / "kWh" etc.
 
 
 @dataclasses.dataclass
 class HaValues:
     device_name: str
-    values: list[HaValue, ...]
+    values: list[HaValue]
     prefix: str = 'homeassistant'
     component: str = 'sensor'
 
