@@ -54,7 +54,7 @@ Source = "https://github.com/jedie/ha_services"
 
 [project.scripts]
 ha_services_app = "ha_services.__main__:main"
-ha_services_dev = "ha_services.cli.dev:main"
+ha_services_dev = "ha_services.cli_dev:main"
 
 [build-system]
 requires = ["setuptools>=61.0", "setuptools_scm>=7.1"]
@@ -147,7 +147,7 @@ initial_date = 2023-05-07T13:44:43+02:00
 cookiecutter_template = "https://github.com/jedie/cookiecutter_templates/"
 cookiecutter_directory = "piptools-python"
 applied_migrations = [
-    "9e29a86", # 2024-02-29T22:32:49+01:00
+    "765b8fb", # 2024-03-12T09:08:01+01:00
 ]
 
 [manageprojects.cookiecutter_context.cookiecutter]

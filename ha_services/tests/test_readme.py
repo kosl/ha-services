@@ -10,8 +10,8 @@ from cli_base.toml_settings.test_utils.cli_mock import TomlSettingsCliMock
 from manageprojects.tests.base import BaseTestCase
 
 from ha_services import constants
-from ha_services.cli.cli_app import SETTINGS_DIR_NAME, SETTINGS_FILE_NAME
-from ha_services.cli.dev import PACKAGE_ROOT
+from ha_services.cli_app.settings import SETTINGS_DIR_NAME, SETTINGS_FILE_NAME
+from ha_services.cli_dev import PACKAGE_ROOT
 from ha_services.example import DemoSettings
 
 
