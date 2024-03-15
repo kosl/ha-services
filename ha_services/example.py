@@ -7,6 +7,7 @@ import time
 from cli_base.systemd.data_classes import BaseSystemdServiceInfo, BaseSystemdServiceTemplateContext
 from rich import print  # noqa
 
+import ha_services
 from ha_services.mqtt4homeassistant.converter import values2mqtt_payload
 from ha_services.mqtt4homeassistant.data_classes import HaValue, HaValues, MqttSettings
 from ha_services.mqtt4homeassistant.mqtt import HaMqttPublisher
@@ -78,21 +79,18 @@ def publish_forever(*, user_settings: DemoSettings, verbosity: int):
             HaValue(
                 name='System load 1min.',
                 value=os.getloadavg()[0],
-                device_class='',
                 state_class='measurement',
                 unit='',
             ),
             HaValue(
                 name='Time in user mode (float seconds)',
                 value=usage.ru_utime,
-                device_class='',
                 state_class='measurement',
                 unit='sec',
             ),
             HaValue(
                 name='Time in system mode (float seconds)',
                 value=usage.ru_stime,
-                device_class='',
                 state_class='measurement',
                 unit='sec',
             ),
@@ -105,7 +103,14 @@ def publish_forever(*, user_settings: DemoSettings, verbosity: int):
         )
 
         # Create Payload:
-        ha_mqtt_payload = values2mqtt_payload(values=ha_values, name_prefix=user_settings.app.mqtt_payload_prefix)
+        ha_mqtt_payload = values2mqtt_payload(
+            values=ha_values,
+            name_prefix=user_settings.app.mqtt_payload_prefix,
+            device_extra_info={
+                'manufacturer': 'ha-services-demo',
+                'sw_version': ha_services.__version__,
+            },
+        )
 
         # Send vial MQTT to HomeAssistant:
         publisher.publish2homeassistant(ha_mqtt_payload=ha_mqtt_payload)

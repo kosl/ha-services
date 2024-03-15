@@ -31,7 +31,13 @@ class ConverterTestCase(TestCase):
                                 'name': 'egg boiler',
                             },
                             'device_class': 'energy',
+                            'enabled_by_default': True,
                             'name': 'Power',
+                            'origin': {
+                                'name': 'ha-services',
+                                'support_url': 'https://pypi.org/project/ha_services/',
+                                'sw_version': '0.6.0',
+                            },
                             'state_class': 'measurement',
                             'state_topic': 'homeassistant/sensor/test_eggboiler/state',
                             'unique_id': 'test_eggboiler_power',
