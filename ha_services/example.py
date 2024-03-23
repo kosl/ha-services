@@ -10,6 +10,7 @@ from paho.mqtt.client import Client
 from rich import print  # noqa
 
 import ha_services
+from ha_services.mqtt4homeassistant.components.binary_sensor import BinarySensor
 from ha_services.mqtt4homeassistant.components.sensor import Sensor
 from ha_services.mqtt4homeassistant.components.switch import Switch
 from ha_services.mqtt4homeassistant.data_classes import MqttSettings
@@ -75,7 +76,14 @@ def publish_forever(*, user_settings: DemoSettings, verbosity: int):
         name='ha-services Example',
         uid='ha_services',
         manufacturer='ha_services',
+        model='Just the example.py ;)',
         sw_version=ha_services.__version__,
+    )
+
+    activate_relay = BinarySensor(
+        device=device,
+        name='Activate Relay',
+        uid='activate_relay',
     )
 
     relay_delay = Sensor(
@@ -90,6 +98,11 @@ def publish_forever(*, user_settings: DemoSettings, verbosity: int):
         logger.info(f'{component.name} state changed: {old_state!r} -> {new_state!r}')
         delay = random.randrange(5)
         logger.info(f'{delay=}')
+
+        if not activate_relay.is_on:
+            logger.info('Relay is not activated!')
+            return
+
         relay_delay.set_state(delay)
         relay_delay.publish_config_and_state(mqttc)
         time.sleep(delay)
@@ -133,6 +146,9 @@ def publish_forever(*, user_settings: DemoSettings, verbosity: int):
     relay.set_state(relay.OFF if random.randrange(2) else relay.ON)
 
     while True:
+        activate_relay.set_state(relay.OFF if random.randrange(2) else relay.ON)
+        activate_relay.publish_config_and_state(mqttc)
+
         relay.publish_config_and_state(mqttc)
 
         system_load_sensor.set_state(os.getloadavg()[0])
