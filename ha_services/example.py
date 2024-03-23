@@ -84,6 +84,7 @@ def publish_forever(*, user_settings: DemoSettings, verbosity: int):
         device=device,
         name='Activate Relay',
         uid='activate_relay',
+        device_class=None,  # None == Generic ON/OFF or e.g.: 'door', 'motion', etc...
     )
 
     relay_delay = Sensor(

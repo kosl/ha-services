@@ -12,6 +12,7 @@ class BinarySensor(BaseComponent):
     """
     MQTT Switch component for Home Assistant.
     https://www.home-assistant.io/integrations/binary_sensor.mqtt/
+
     """
 
     ON = 'ON'
@@ -24,8 +25,11 @@ class BinarySensor(BaseComponent):
         name: str,
         uid: str,
         component: str = 'binary_sensor',
+        device_class: str | None = None,  # https://www.home-assistant.io/integrations/binary_sensor/#device-class
     ):
         super().__init__(device=device, name=name, uid=uid, component=component)
+
+        self.device_class = device_class
 
         self.state2bool = {
             self.ON: True,
@@ -55,6 +59,7 @@ class BinarySensor(BaseComponent):
             payload={
                 'component': self.component,
                 'device': self.device.get_mqtt_payload(),
+                'device_class': self.device_class,  # e.g.: 'door', 'motion', etc...
                 'name': self.name,
                 'unique_id': self.uid,
                 'payload_off': self.OFF,
