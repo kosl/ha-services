@@ -73,3 +73,10 @@ Usage: ./cli.py [OPTIONS] COMMAND [ARGS]...
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 [comment]: <> (✂✂✂ auto generated app help end ✂✂✂)
+
+
+# Backwards-incompatible changes
+## v2.0.0
+
+Complete refactor of `mqtt4homeassistant` module.
+New usage, see: `ha_services/example.py`

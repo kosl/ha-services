@@ -1,31 +1,24 @@
 from __future__ import annotations
 
 import dataclasses
+from typing import TypeAlias
 
 from bx_py_utils.anonymize import anonymize
 
 
-@dataclasses.dataclass
-class HaValue:
-    name: str
-    value: int | float | str
-    device_class: str | None = None  # e.g.: "voltage" / "current" / "energy" etc.
-    state_class: str | None = None  # e.g.: "measurement" / "total" / "total_increasing" etc.
-    unit: str | None = None  # e.g.: "V" / "A" / "kWh" etc.
+StatePayload: TypeAlias = str | bytes | bytearray | int | float | None
 
 
 @dataclasses.dataclass
-class HaValues:
-    device_name: str
-    values: list[HaValue]
-    prefix: str = 'homeassistant'
-    component: str = 'sensor'
+class ComponentState:
+    topic: str
+    payload: StatePayload
 
 
 @dataclasses.dataclass
-class HaMqttPayload:
-    configs: list[dict, ...]
-    state: dict
+class ComponentConfig:
+    topic: str
+    payload: dict
 
 
 @dataclasses.dataclass

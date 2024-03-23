@@ -1,4 +1,3 @@
-import json
 import logging
 import socket
 
@@ -6,10 +5,9 @@ import paho.mqtt.client as mqtt
 from bx_py_utils.anonymize import anonymize
 from cli_base.cli_tools.rich_utils import human_error
 from rich import print
-from rich.pretty import pprint
 
 from ha_services import __version__
-from ha_services.mqtt4homeassistant.data_classes import HaMqttPayload, MqttSettings
+from ha_services.mqtt4homeassistant.data_classes import MqttSettings
 
 
 logger = logging.getLogger(__name__)
@@ -42,7 +40,7 @@ class OnConnectCallback:
             print(f'\t{flags=}')
 
 
-def get_connected_client(settings: MqttSettings, verbosity: int, timeout=10):
+def get_connected_client(settings: MqttSettings, verbosity: int, timeout=10) -> mqtt.Client:
     client_id = get_client_id()
 
     if verbosity:
@@ -84,41 +82,3 @@ def get_connected_client(settings: MqttSettings, verbosity: int, timeout=10):
     if verbosity:
         print('[green]OK')
     return mqttc
-
-
-class HaMqttPublisher:
-    def __init__(self, settings: MqttSettings, verbosity: int = 0, config_count: int = 10):
-        self.verbosity = verbosity
-        self.mqttc = get_connected_client(settings=settings, verbosity=verbosity)
-        self.mqttc.loop_start()
-
-        self.config_count = config_count
-        self.send_count = 0
-
-    def publish(self, *, topic: str, payload: dict) -> None:
-        if self.verbosity:
-            print('_' * 100)
-            print(f'[yellow]Publish MQTT topic: [blue]{topic} [grey](Send count: {self.send_count})')
-            pprint(payload)
-
-        info: mqtt.MQTTMessageInfo = self.mqttc.publish(topic=topic, payload=json.dumps(payload))
-        if self.verbosity:
-            print('publish result:', info)
-
-    def publish2homeassistant(self, *, ha_mqtt_payload: HaMqttPayload) -> None:
-        log_prefix = f'{self.send_count=} ({self.config_count=})'
-
-        if self.send_count == 0 or self.send_count % self.config_count == 0:
-            logger.debug(f'{log_prefix} send {len(ha_mqtt_payload.configs)} configs')
-            for config in ha_mqtt_payload.configs:
-                self.publish(
-                    topic=config['topic'],
-                    payload=config['data'],
-                )
-
-        logger.debug(f'{log_prefix} send {len(ha_mqtt_payload.state["data"])} values')
-        self.publish(
-            topic=ha_mqtt_payload.state['topic'],
-            payload=ha_mqtt_payload.state['data'],
-        )
-        self.send_count += 1
