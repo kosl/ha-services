@@ -48,5 +48,4 @@ class DeviceTestCase(TestCase):
                 'sw_version': '1.2.3',
             },
         )
-        self.assertIsInstance(mqtt_payload, dict)
         self.assertIsInstance(mqtt_payload, frozendict)
