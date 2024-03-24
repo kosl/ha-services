@@ -59,7 +59,7 @@ class Switch(BaseComponent):
         client.message_callback_add(self.command_topic, self._command_callback)
         result, _ = client.subscribe(self.command_topic)
         if result is not MQTT_ERR_SUCCESS:
-            raise RuntimeError(f'Error subscribing {self.command_topic=}')
+            logger.error(f'Error subscribing {self.command_topic=}: {result=}')
 
         return info
 
