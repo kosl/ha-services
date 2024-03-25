@@ -1,16 +1,27 @@
 import abc
 import json
 import logging
+from functools import cache
 
 from frozendict import frozendict
 from paho.mqtt.client import Client, MQTTMessageInfo
 
+import ha_services
 from ha_services.mqtt4homeassistant.data_classes import ComponentConfig, ComponentState
-from ha_services.mqtt4homeassistant.device import MqttDevice, get_origin_data
+from ha_services.mqtt4homeassistant.device import MqttDevice
 from ha_services.mqtt4homeassistant.utilities.assertments import assert_uid
 
 
 logger = logging.getLogger(__name__)
+
+
+@cache
+def get_origin_data() -> dict:
+    return {
+        'name': 'ha-services',
+        'sw_version': ha_services.__version__,
+        'support_url': 'https://pypi.org/project/ha_services/',
+    }
 
 
 class BaseComponent(abc.ABC):

@@ -2,26 +2,15 @@ import logging
 import os
 import resource
 import socket
-from functools import cache
 
 from frozendict import frozendict
 from paho.mqtt.client import Client
 
-import ha_services
 from ha_services.mqtt4homeassistant.utilities.assertments import assert_uid
 from ha_services.mqtt4homeassistant.utilities.system_utils import get_running_time, get_system_uptime
 
 
 logger = logging.getLogger(__name__)
-
-
-@cache
-def get_origin_data() -> dict:
-    return {
-        'name': 'ha-services',
-        'sw_version': ha_services.__version__,
-        'support_url': 'https://pypi.org/project/ha_services/',
-    }
 
 
 class BaseMqttDevice:
@@ -66,6 +55,7 @@ class MqttDevice(BaseMqttDevice):
 
         if main_device:
             self.via_device = main_device.uid
+            self.uid = f'{main_device.uid}-{self.uid}'
 
     def get_mqtt_payload(self) -> dict:
         if self._mqtt_payload_cache is None:
