@@ -14,7 +14,7 @@ from ha_services.mqtt4homeassistant.components.binary_sensor import BinarySensor
 from ha_services.mqtt4homeassistant.components.sensor import Sensor
 from ha_services.mqtt4homeassistant.components.switch import Switch
 from ha_services.mqtt4homeassistant.data_classes import MqttSettings
-from ha_services.mqtt4homeassistant.device import MqttDevice
+from ha_services.mqtt4homeassistant.device import MainMqttDevice, MqttDevice
 from ha_services.mqtt4homeassistant.mqtt import get_connected_client
 
 
@@ -72,9 +72,18 @@ def publish_forever(*, user_settings: DemoSettings, verbosity: int):
     Publish "something" to MQTT server. It's just a DEMO ;)
     """
 
+    main_device = MainMqttDevice(
+        name='ha-services Main Device Example',
+        uid='ha_services_main',
+        manufacturer='ha_services',
+        model='Just the example.py ;)',
+        sw_version=ha_services.__version__,
+    )
+
     device = MqttDevice(
-        name='ha-services Example',
-        uid='ha_services',
+        main_device=main_device,
+        name='ha-services Sub Device Example',
+        uid='ha_services_sub',
         manufacturer='ha_services',
         model='Just the example.py ;)',
         sw_version=ha_services.__version__,
@@ -147,6 +156,8 @@ def publish_forever(*, user_settings: DemoSettings, verbosity: int):
     relay.set_state(relay.OFF if random.randrange(2) else relay.ON)
 
     while True:
+        main_device.poll_and_publish(mqttc)
+
         activate_relay.set_state(relay.OFF if random.randrange(2) else relay.ON)
         activate_relay.publish_config_and_state(mqttc)
 
