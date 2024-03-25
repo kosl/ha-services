@@ -10,6 +10,12 @@ Helpers to send periodic information via MQTT to Home Assistant
 
 * https://pypi.org/project/ha-services/
 
+Use by:
+
+* https://github.com/jedie/tinkerforge2mqtt
+* https://github.com/jedie/victron-ble2mqtt
+* https://github.com/jedie/energymeter2mqtt
+* https://github.com/jedie/pysmartmeter
 
 # start development
 
