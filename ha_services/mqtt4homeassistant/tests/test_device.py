@@ -13,6 +13,8 @@ class DeviceTestCase(TestCase):
             device.get_mqtt_payload(),
             {'name': 'My Device', 'identifiers': 'device1'},
         )
+        self.assertEqual(device.topic_prefix, 'homeassistant')
+        self.assertEqual(device.uid, 'device1')
 
         switch1 = Switch(device=device, name='My Switch 1', uid='switch1')
         switch2 = Switch(device=device, name='My Switch 2', uid='switch2')
@@ -36,10 +38,12 @@ class DeviceTestCase(TestCase):
             device.get_mqtt_payload(),
             {
                 'name': 'Sub Device',
-                'identifiers': 'sub_device',
+                'identifiers': 'main_device-sub_device',
                 'via_device': 'main_device',
             },
         )
+        self.assertEqual(device.topic_prefix, 'homeassistant')
+        self.assertEqual(device.uid, 'main_device-sub_device')
 
     def test_device_extras(self):
         device = MqttDevice(

@@ -74,7 +74,7 @@ def publish_forever(*, user_settings: DemoSettings, verbosity: int):
 
     main_device = MainMqttDevice(
         name='ha-services Main Device Example',
-        uid='ha_services_main',
+        uid=user_settings.mqtt.main_uid,
         manufacturer='ha_services',
         model='Just the example.py ;)',
         sw_version=ha_services.__version__,
