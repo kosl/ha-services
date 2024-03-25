@@ -3,7 +3,7 @@ from unittest import TestCase
 from frozendict import frozendict
 
 from ha_services.mqtt4homeassistant.components.switch import Switch
-from ha_services.mqtt4homeassistant.device import MqttDevice
+from ha_services.mqtt4homeassistant.device import MainMqttDevice, MqttDevice
 
 
 class DeviceTestCase(TestCase):
@@ -26,6 +26,18 @@ class DeviceTestCase(TestCase):
             {
                 'device1-switch1': switch1,
                 'device1-switch2': switch2,
+            },
+        )
+
+    def test_device_with_main_device(self):
+        main_device = MainMqttDevice(name='Main Device', uid='main_device')
+        device = MqttDevice(main_device=main_device, name='Sub Device', uid='sub_device')
+        self.assertEqual(
+            device.get_mqtt_payload(),
+            {
+                'name': 'Sub Device',
+                'identifiers': 'sub_device',
+                'via_device': 'main_device',
             },
         )
 
