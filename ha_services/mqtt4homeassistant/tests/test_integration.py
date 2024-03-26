@@ -1,3 +1,4 @@
+import datetime
 import json
 from unittest import TestCase
 from unittest.mock import patch
@@ -88,7 +89,7 @@ class IntergrationTestCase(TestCase):
         )
 
         mqtt_client_mock = MqttClientMock()
-        with MainMqttDeviceMock():
+        with MainMqttDeviceMock(), self.assertLogs('ha_services', level='DEBUG'):
             main_device.poll_and_publish(mqtt_client_mock)
 
         first_message = mqtt_client_mock.messages[0]
@@ -112,5 +113,25 @@ class IntergrationTestCase(TestCase):
                 'unit_of_measurement': None,
             },
         )
+
+        replaces = []
+        for message in mqtt_client_mock.messages:
+            if message['topic'] == 'homeassistant/sensor/main_uid/main_uid-up_time/state':
+                datetime.datetime.fromisoformat(message['payload'])
+                message['payload'] = '<mocked up_time>'
+                replaces.append('up_time')
+
+            if message['topic'] == 'homeassistant/sensor/main_uid/main_uid-process_start/state':
+                datetime.datetime.fromisoformat(message['payload'])
+                message['payload'] = '<mocked process_start>'
+                replaces.append('process_start')
+
+            if message['topic'] == 'homeassistant/sensor/main_uid/main_uid-cpu_freq/state':
+                self.assertIsInstance(message['payload'], float)
+                self.assertGreater(message['payload'], 0)
+                message['payload'] = '<mocked cpu_freq>'
+                replaces.append('cpu_freq')
+
+        self.assertEqual(replaces, ['up_time', 'process_start', 'cpu_freq'])
 
         assert_snapshot(got=mqtt_client_mock.messages)

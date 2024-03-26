@@ -13,6 +13,7 @@ dependencies = [
     "tomlkit",  # https://github.com/sdispater/tomlkit
     "msgspec",  # https://github.com/jcrist/msgspec
     "frozendict",  # https://github.com/Marco-Sulla/python-frozendict
+    "psutil",  # https://github.com/giampaolo/psutil/
     "cli-base-utilities",  # https://github.com/jedie/cli-base-utilities
     "click",  # https://github.com/pallets/click/
     "rich-click",  # https://github.com/ewels/rich-click

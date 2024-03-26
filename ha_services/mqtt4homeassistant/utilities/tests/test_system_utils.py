@@ -1,6 +1,11 @@
+import datetime
 from unittest import TestCase
 
-from ha_services.mqtt4homeassistant.utilities.system_utils import get_running_time, get_system_uptime
+from ha_services.mqtt4homeassistant.utilities.system_utils import (
+    get_system_start_datetime,
+    get_system_uptime,
+    process_start_datetime,
+)
 
 
 class SystemUtilsTestCase(TestCase):
@@ -9,7 +14,10 @@ class SystemUtilsTestCase(TestCase):
         self.assertIsInstance(uptime, float)
         self.assertGreater(uptime, 0)
 
-    def test_get_running_time(self):
-        running_time = get_running_time()
-        self.assertIsInstance(running_time, int)
-        self.assertGreaterEqual(running_time, 0)
+    def test_get_system_start_datetime(self):
+        start_dt = get_system_start_datetime()
+        self.assertIsInstance(start_dt, datetime.datetime)
+
+    def test_process_start_datetime(self):
+        start_dt = process_start_datetime()
+        self.assertIsInstance(start_dt, datetime.datetime)

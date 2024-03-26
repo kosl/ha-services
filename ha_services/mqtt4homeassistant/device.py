@@ -7,7 +7,6 @@ from frozendict import frozendict
 from paho.mqtt.client import Client
 
 from ha_services.mqtt4homeassistant.utilities.assertments import assert_uid
-from ha_services.mqtt4homeassistant.utilities.system_utils import get_running_time, get_system_uptime
 
 
 logger = logging.getLogger(__name__)
@@ -83,22 +82,16 @@ class MainMqttDevice(MqttDevice):
             name='Hostname',
             uid='hostname',
         )
-        self.up_time = Sensor(
-            device=self,
-            name='System Up Time',
-            uid='up_time',
-            state_class='measurement',
-            unit_of_measurement='seconds',
-            suggested_display_precision=0,
-        )
-        self.running_time = Sensor(
-            device=self,
-            name='Running Time',
-            uid='running_time',
-            state_class='measurement',
-            unit_of_measurement='seconds',
-            suggested_display_precision=0,
-        )
+
+        from ha_services.mqtt4homeassistant.system_info.up_time import StartTimeSensor, UpTimeSensor  # import loop
+
+        self.up_time_sensor = UpTimeSensor(device=self)
+        self.process_start_sensor = StartTimeSensor(device=self)
+
+        from ha_services.mqtt4homeassistant.system_info.cpu import CpuFreqSensor  # import loop
+
+        self.cpu_freq_sensor = CpuFreqSensor(device=self)
+
         self.execute_time = Sensor(
             device=self,
             name='Execute Time',
@@ -121,11 +114,9 @@ class MainMqttDevice(MqttDevice):
         self.hostname.set_state(socket.gethostname())
         self.hostname.publish_config_and_state(client)
 
-        self.up_time.set_state(get_system_uptime())
-        self.up_time.publish_config_and_state(client)
-
-        self.running_time.set_state(get_running_time())
-        self.running_time.publish_config_and_state(client)
+        self.up_time_sensor.publish_config_and_state(client)
+        self.process_start_sensor.publish_config_and_state(client)
+        self.cpu_freq_sensor.publish_config_and_state(client)
 
         self.system_load_1min.set_state(os.getloadavg()[0])
         self.system_load_1min.publish_config_and_state(client)
