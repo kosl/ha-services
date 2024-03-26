@@ -9,7 +9,7 @@ from bx_py_utils.test_utils.snapshot import assert_snapshot
 from ha_services.mqtt4homeassistant.components.sensor import Sensor
 from ha_services.mqtt4homeassistant.data_classes import ComponentConfig, ComponentState
 from ha_services.mqtt4homeassistant.device import MainMqttDevice, MqttDevice
-from ha_services.mqtt4homeassistant.utilities.mqtt_client_mock import MainMqttDeviceMock, MqttClientMock
+from ha_services.mqtt4homeassistant.mocks.mqtt_client_mock import MainMqttDeviceMock, MqttClientMock
 
 
 class IntergrationTestCase(TestCase):
@@ -116,6 +116,9 @@ class IntergrationTestCase(TestCase):
 
         replaces = []
         for message in mqtt_client_mock.messages:
+            payload = message['payload']
+            self.assertIsInstance(payload, (int, float, str), message)
+
             if message['topic'] == 'homeassistant/sensor/main_uid/main_uid-up_time/state':
                 datetime.datetime.fromisoformat(message['payload'])
                 message['payload'] = '<mocked up_time>'
@@ -126,12 +129,6 @@ class IntergrationTestCase(TestCase):
                 message['payload'] = '<mocked process_start>'
                 replaces.append('process_start')
 
-            if message['topic'] == 'homeassistant/sensor/main_uid/main_uid-cpu_freq/state':
-                self.assertIsInstance(message['payload'], float)
-                self.assertGreater(message['payload'], 0)
-                message['payload'] = '<mocked cpu_freq>'
-                replaces.append('cpu_freq')
-
-        self.assertEqual(replaces, ['up_time', 'process_start', 'cpu_freq'])
+        self.assertEqual(replaces, ['up_time', 'process_start'])
 
         assert_snapshot(got=mqtt_client_mock.messages)

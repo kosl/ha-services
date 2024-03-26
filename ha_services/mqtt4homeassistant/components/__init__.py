@@ -1,6 +1,7 @@
 import abc
 import json
 import logging
+import typing
 from functools import cache
 
 from frozendict import frozendict
@@ -8,8 +9,11 @@ from paho.mqtt.client import Client, MQTTMessageInfo
 
 import ha_services
 from ha_services.mqtt4homeassistant.data_classes import ComponentConfig, ComponentState
-from ha_services.mqtt4homeassistant.device import MqttDevice
 from ha_services.mqtt4homeassistant.utilities.assertments import assert_uid
+
+
+if typing.TYPE_CHECKING:
+    from ha_services.mqtt4homeassistant.device import MqttDevice
 
 
 logger = logging.getLogger(__name__)
@@ -28,7 +32,7 @@ class BaseComponent(abc.ABC):
     def __init__(
         self,
         *,
-        device: MqttDevice,
+        device: 'MqttDevice',
         name: str,
         uid: str,
         component: str,
@@ -86,3 +90,9 @@ class BaseComponent(abc.ABC):
     @abc.abstractmethod
     def get_config(self) -> ComponentConfig:
         pass
+
+    def __str__(self):
+        return f'{self.__class__.__name__}({self.uid=})'
+
+    def __repr__(self):
+        return f'<{self} {id(self)}>'

@@ -1,11 +1,19 @@
 import logging
-import os
-import resource
 import socket
 
 from frozendict import frozendict
 from paho.mqtt.client import Client
 
+from ha_services.mqtt4homeassistant.components.sensor import Sensor
+from ha_services.mqtt4homeassistant.system_info.cpu import (
+    CpuFreqSensor,
+    ProcessCpuUsageSensor,
+    SystemLoad1MinSensor,
+    TotalCpuUsageSensor,
+)
+from ha_services.mqtt4homeassistant.system_info.memory import SwapUsageSensor
+from ha_services.mqtt4homeassistant.system_info.temperatures import TemperaturesSensors
+from ha_services.mqtt4homeassistant.system_info.up_time import StartTimeSensor, UpTimeSensor
 from ha_services.mqtt4homeassistant.utilities.assertments import assert_uid
 
 
@@ -40,6 +48,8 @@ class BaseMqttDevice:
         self.components = {}
 
     def register_component(self, *, component):
+        logger.debug(f'Registering component: {component}')
+
         from ha_services.mqtt4homeassistant.components import BaseComponent
 
         assert isinstance(component, BaseComponent)
@@ -75,38 +85,22 @@ class MainMqttDevice(MqttDevice):
         assert 'main_device' not in kwargs, 'main_device is not allowed for MainMqttDevice'
         super().__init__(**kwargs)
 
-        from ha_services.mqtt4homeassistant.components.sensor import Sensor
-
         self.hostname = Sensor(
             device=self,
             name='Hostname',
             uid='hostname',
         )
 
-        from ha_services.mqtt4homeassistant.system_info.up_time import StartTimeSensor, UpTimeSensor  # import loop
-
         self.up_time_sensor = UpTimeSensor(device=self)
         self.process_start_sensor = StartTimeSensor(device=self)
-
-        from ha_services.mqtt4homeassistant.system_info.cpu import CpuFreqSensor  # import loop
-
         self.cpu_freq_sensor = CpuFreqSensor(device=self)
+        self.swap_usage = SwapUsageSensor(device=self)
 
-        self.execute_time = Sensor(
-            device=self,
-            name='Execute Time',
-            uid='execute_time',
-            state_class='measurement',
-            unit_of_measurement='seconds',
-            suggested_display_precision=1,
-        )
-        self.system_load_1min = Sensor(
-            device=self,
-            name='System load 1min.',
-            uid='system_load_1min',
-            state_class='measurement',
-            suggested_display_precision=2,
-        )
+        self.system_load_1min = SystemLoad1MinSensor(device=self)
+        self.total_cpu_usage = TotalCpuUsageSensor(device=self)
+        self.process_cpu_usage = ProcessCpuUsageSensor(device=self)
+
+        self.temperatures_sensors = TemperaturesSensors(device=self)
 
     def poll_and_publish(self, client: Client) -> None:
         logger.debug(f'Polling {self.name} ({self.uid})')
@@ -117,11 +111,10 @@ class MainMqttDevice(MqttDevice):
         self.up_time_sensor.publish_config_and_state(client)
         self.process_start_sensor.publish_config_and_state(client)
         self.cpu_freq_sensor.publish_config_and_state(client)
+        self.swap_usage.publish_config_and_state(client)
 
-        self.system_load_1min.set_state(os.getloadavg()[0])
         self.system_load_1min.publish_config_and_state(client)
+        self.total_cpu_usage.publish_config_and_state(client)
+        self.process_cpu_usage.publish_config_and_state(client)
 
-        usage = resource.getrusage(resource.RUSAGE_SELF)
-        user_and_system_time = usage.ru_utime + usage.ru_stime
-        self.execute_time.set_state(user_and_system_time)
-        self.execute_time.publish_config_and_state(client)
+        self.temperatures_sensors.publish_config_and_state(client)
