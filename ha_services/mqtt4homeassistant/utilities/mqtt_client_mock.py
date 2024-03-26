@@ -19,8 +19,6 @@ class MainMqttDeviceMock(MassContextManager):
 
         self.mocks = (
             patch('ha_services.mqtt4homeassistant.device.socket.gethostname', return_value='TheHostName'),
-            patch('ha_services.mqtt4homeassistant.device.get_system_uptime', return_value=123),
-            patch('ha_services.mqtt4homeassistant.device.get_running_time', return_value=12),
             patch('ha_services.mqtt4homeassistant.device.os.getloadavg', return_value=(1, 2, 3)),
             patch('ha_services.mqtt4homeassistant.device.resource.getrusage', return_value=UsageMock),
         )

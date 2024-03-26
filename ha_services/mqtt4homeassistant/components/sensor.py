@@ -16,6 +16,8 @@ class Sensor(BaseComponent):
         name: str,
         uid: str,
         component: str = 'sensor',
+        #
+        # https://www.home-assistant.io/integrations/sensor/#device-class
         device_class: str | None = None,  # e.g.: 'temperature'
         state_class: str | None = None,  # e.g.: 'measurement'
         unit_of_measurement: str | None = None,  # e.g.: '°C' / 'W' etc.
