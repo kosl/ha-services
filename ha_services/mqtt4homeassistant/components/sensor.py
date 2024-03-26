@@ -1,6 +1,11 @@
+import typing
+
 from ha_services.mqtt4homeassistant.components import BaseComponent
 from ha_services.mqtt4homeassistant.data_classes import ComponentConfig, ComponentState, StatePayload
-from ha_services.mqtt4homeassistant.device import MqttDevice
+
+
+if typing.TYPE_CHECKING:
+    from ha_services.mqtt4homeassistant.device import MqttDevice
 
 
 class Sensor(BaseComponent):
@@ -12,13 +17,15 @@ class Sensor(BaseComponent):
     def __init__(
         self,
         *,
-        device: MqttDevice,
+        device: 'MqttDevice',
         name: str,
         uid: str,
         component: str = 'sensor',
         #
         # https://www.home-assistant.io/integrations/sensor/#device-class
         device_class: str | None = None,  # e.g.: 'temperature'
+        #
+        # https://developers.home-assistant.io/docs/core/entity/sensor/#available-state-classes
         state_class: str | None = None,  # e.g.: 'measurement'
         unit_of_measurement: str | None = None,  # e.g.: '°C' / 'W' etc.
         suggested_display_precision: int | None = None,

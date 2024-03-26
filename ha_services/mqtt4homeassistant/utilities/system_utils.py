@@ -1,22 +1,11 @@
 import datetime
 import os
-from pathlib import Path
 
 import psutil
 
 
-UPTIME_PATH = Path('/proc/uptime')
-
-
-def get_system_uptime() -> float:
-    content = UPTIME_PATH.read_text()
-    uptime_seconds = content.split()[0]
-    return float(uptime_seconds)
-
-
 def get_system_start_datetime() -> datetime.datetime:
-    uptime_sec = get_system_uptime()
-    start_dt = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(seconds=uptime_sec)
+    start_dt = datetime.datetime.fromtimestamp(psutil.boot_time())
     return start_dt
 
 

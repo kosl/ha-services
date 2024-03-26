@@ -17,6 +17,7 @@ class UpTimeSensor(Sensor):
         kwargs.setdefault('uid', 'up_time')
         super().__init__(**kwargs)
 
+        # Set only one time. No need to update.
         system_start: datetime.datetime = get_system_start_datetime()
         self.set_state(system_start.isoformat())
 
@@ -33,5 +34,6 @@ class StartTimeSensor(Sensor):
         kwargs.setdefault('uid', 'process_start')
         super().__init__(**kwargs)
 
+        # Set only one time. No need to update.
         process_start: datetime.datetime = process_start_datetime()
         self.set_state(process_start.isoformat())
