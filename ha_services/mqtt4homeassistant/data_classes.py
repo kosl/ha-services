@@ -33,6 +33,9 @@ class MqttSettings:
     Credentials to MQTT server that should be used.
 
     The `main_uid` is used as a second prefix for all MQTT messages, to avoid conflicts.
+
+    With `publish_config_throttle_seconds` you can set the throttle interval
+    for publishing config messages to Home Assistant.
     """
 
     host: str = 'mqtt.eclipseprojects.io'  # public test MQTT broker service
@@ -41,6 +44,7 @@ class MqttSettings:
     password: str = ''
 
     main_uid: str = dataclasses.field(default_factory=socket.gethostname)
+    publish_config_throttle_seconds: int = 20
 
     def __post_init__(self):
         assert self.main_uid, 'main_uid must be provided'

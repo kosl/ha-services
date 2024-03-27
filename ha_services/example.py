@@ -78,6 +78,7 @@ def publish_forever(*, user_settings: DemoSettings, verbosity: int):
         manufacturer='ha_services',
         model='Just the example.py ;)',
         sw_version=ha_services.__version__,
+        config_throttle_sec=user_settings.mqtt.publish_config_throttle_seconds,
     )
 
     device = MqttDevice(
@@ -114,7 +115,7 @@ def publish_forever(*, user_settings: DemoSettings, verbosity: int):
             return
 
         relay_delay.set_state(delay)
-        relay_delay.publish_config_and_state(mqttc)
+        relay_delay.publish(mqttc)
         time.sleep(delay)
 
         component.set_state(new_state)
@@ -159,19 +160,19 @@ def publish_forever(*, user_settings: DemoSettings, verbosity: int):
         main_device.poll_and_publish(mqttc)
 
         activate_relay.set_state(relay.OFF if random.randrange(2) else relay.ON)
-        activate_relay.publish_config_and_state(mqttc)
+        activate_relay.publish(mqttc)
 
-        relay.publish_config_and_state(mqttc)
+        relay.publish(mqttc)
 
         system_load_sensor.set_state(os.getloadavg()[0])
-        system_load_sensor.publish_config_and_state(mqttc)
+        system_load_sensor.publish(mqttc)
 
         usage = resource.getrusage(resource.RUSAGE_SELF)
         user_time_used_sensor.set_state(usage.ru_utime)
-        user_time_used_sensor.publish_config_and_state(mqttc)
+        user_time_used_sensor.publish(mqttc)
 
         system_time_used_sensor.set_state(usage.ru_stime)
-        system_time_used_sensor.publish_config_and_state(mqttc)
+        system_time_used_sensor.publish(mqttc)
 
         print('\n', flush=True)
         print('Wait', end='...')

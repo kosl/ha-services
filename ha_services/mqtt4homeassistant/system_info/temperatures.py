@@ -1,3 +1,4 @@
+import logging
 import statistics
 import typing
 
@@ -10,6 +11,9 @@ from ha_services.mqtt4homeassistant.utilities.string_utils import slugify
 
 if typing.TYPE_CHECKING:
     from ha_services.mqtt4homeassistant.device import MqttDevice
+
+
+logger = logging.getLogger(__name__)
 
 
 def median_temperatures(temperatures: dict) -> dict:
@@ -33,6 +37,7 @@ class TemperaturesSensors:
 
         temperatures = psutil.sensors_temperatures()
         for name in temperatures.keys():
+            logger.info('Creating temperature sensor: %r', name)
             sensor = Sensor(
                 device=self.device,
                 name=f'Temperature {name}',
@@ -44,9 +49,9 @@ class TemperaturesSensors:
             )
             self.sensors[name] = sensor
 
-    def publish_config_and_state(self, client: Client) -> None:
+    def publish(self, client: Client) -> None:
         temperatures = get_median_temperatures()
         for name, median_temperature in temperatures.items():
             sensor = self.sensors[name]
             sensor.set_state(median_temperature)
-            sensor.publish_config_and_state(client)
+            sensor.publish(client)
