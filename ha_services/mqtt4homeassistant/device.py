@@ -12,6 +12,7 @@ from ha_services.mqtt4homeassistant.system_info.cpu import (
     TotalCpuUsageSensor,
 )
 from ha_services.mqtt4homeassistant.system_info.memory import SwapUsageSensor
+from ha_services.mqtt4homeassistant.system_info.netstat import NetStatSensors
 from ha_services.mqtt4homeassistant.system_info.temperatures import TemperaturesSensors
 from ha_services.mqtt4homeassistant.system_info.up_time import StartTimeSensor, UpTimeSensor
 from ha_services.mqtt4homeassistant.utilities.assertments import assert_uid
@@ -32,6 +33,7 @@ class BaseMqttDevice:
         manufacturer: str | None = None,
         model: str | None = None,
         sw_version: str | None = None,
+        config_throttle_sec: int = 20,
     ):
         self.name = name
 
@@ -43,6 +45,7 @@ class BaseMqttDevice:
         self.manufacturer = manufacturer
         self.model = model
         self.sw_version = sw_version
+        self.config_throttle_sec = config_throttle_sec
 
         self._mqtt_payload_cache = None
         self.components = {}
@@ -101,20 +104,22 @@ class MainMqttDevice(MqttDevice):
         self.process_cpu_usage = ProcessCpuUsageSensor(device=self)
 
         self.temperatures_sensors = TemperaturesSensors(device=self)
+        self.netstat_sensors = NetStatSensors(device=self)
 
     def poll_and_publish(self, client: Client) -> None:
         logger.debug(f'Polling {self.name} ({self.uid})')
 
         self.hostname.set_state(socket.gethostname())
-        self.hostname.publish_config_and_state(client)
+        self.hostname.publish(client)
 
-        self.up_time_sensor.publish_config_and_state(client)
-        self.process_start_sensor.publish_config_and_state(client)
-        self.cpu_freq_sensor.publish_config_and_state(client)
-        self.swap_usage.publish_config_and_state(client)
+        self.up_time_sensor.publish(client)
+        self.process_start_sensor.publish(client)
+        self.cpu_freq_sensor.publish(client)
+        self.swap_usage.publish(client)
 
-        self.system_load_1min.publish_config_and_state(client)
-        self.total_cpu_usage.publish_config_and_state(client)
-        self.process_cpu_usage.publish_config_and_state(client)
+        self.system_load_1min.publish(client)
+        self.total_cpu_usage.publish(client)
+        self.process_cpu_usage.publish(client)
 
-        self.temperatures_sensors.publish_config_and_state(client)
+        self.temperatures_sensors.publish(client)
+        self.netstat_sensors.publish(client)

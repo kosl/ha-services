@@ -18,5 +18,6 @@ class DataClassesTestCase(TestCase):
                 'password': '',
                 'user_name': '',
                 'main_uid': slugify(socket.gethostname(), sep='_'),
+                'publish_config_throttle_seconds': 20,
             },
         )
