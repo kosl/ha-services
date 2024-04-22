@@ -1,5 +1,5 @@
 import logging
-from typing import Callable
+from collections.abc import Callable
 
 from paho.mqtt.client import MQTT_ERR_SUCCESS, Client, MQTTMessageInfo
 
@@ -11,20 +11,17 @@ from ha_services.mqtt4homeassistant.device import MqttDevice
 logger = logging.getLogger(__name__)
 
 
-def default_switch_callback(*, client: Client, component: BaseComponent, old_state: str, new_state: str):
+def default_select_callback(*, client: Client, component: BaseComponent, old_state: str, new_state: str):
     logger.info(f'{component.name} state changed: {old_state!r} -> {new_state!r}')
     component.set_state(new_state)
     component.publish_state(client)
 
 
-class Switch(BaseComponent):
+class Select(BaseComponent):
     """
-    MQTT Switch component for Home Assistant.
-    https://www.home-assistant.io/integrations/switch.mqtt/
+    MQTT Select component for Home Assistant.
+    https://www.home-assistant.io/integrations/select.mqtt/
     """
-
-    ON = 'ON'
-    OFF = 'OFF'
 
     def __init__(
         self,
@@ -32,24 +29,24 @@ class Switch(BaseComponent):
         device: MqttDevice,
         name: str,
         uid: str,
-        callback: Callable = default_switch_callback,
-        component: str = 'switch',
+        callback: Callable = default_select_callback,
+        component: str = 'select',
+        options: tuple[str, ...],
+        default_option: str,
     ):
         super().__init__(device=device, name=name, uid=uid, component=component)
 
         self.callback = callback
 
-        self.state2bool = {
-            self.ON: True,
-            self.OFF: False,
-        }
+        self.options = options
         self.state = None
+        self.set_state(default_option)
 
         self.command_topic = f'{self.topic_prefix}/command'
 
     def _command_callback(self, client: Client, userdata, message: MQTTMessageInfo):
         new_state = message.payload.decode()
-        assert new_state in self.state2bool, f'Receive invalid state: {new_state}'
+        assert new_state in self.options, f'Receive invalid state: {new_state!r}'
 
         self.callback(client=client, component=self, old_state=self.state, new_state=new_state)
 
@@ -64,11 +61,11 @@ class Switch(BaseComponent):
         return info
 
     def set_state(self, state: str):
-        assert state in self.state2bool, f'Invalid state: {state}'
+        assert state in self.options, f'Invalid state: {state!r} - Existing options: {self.options}'
         self.state = state
 
     def get_state(self) -> ComponentState:
-        # e.g.: {'topic': 'homeassistant/switch/My-device/My-Relay/state', 'payload': 'ON'}
+        # e.g.: {'topic': 'homeassistant/select/My-device/My-Relay/state', 'payload': 'ON'}
         return ComponentState(
             topic=f'{self.topic_prefix}/state',
             payload=self.state,
@@ -82,10 +79,9 @@ class Switch(BaseComponent):
                 'device': self.device.get_mqtt_payload(),
                 'name': self.name,
                 'unique_id': self.uid,
-                'payload_off': self.OFF,
-                'payload_on': self.ON,
                 'state_topic': f'{self.topic_prefix}/state',
                 'json_attributes_topic': f'{self.topic_prefix}/attributes',
                 'command_topic': self.command_topic,
+                'options': self.options,
             },
         )

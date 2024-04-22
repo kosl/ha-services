@@ -11,6 +11,7 @@ from rich import print  # noqa
 
 import ha_services
 from ha_services.mqtt4homeassistant.components.binary_sensor import BinarySensor
+from ha_services.mqtt4homeassistant.components.select import Select
 from ha_services.mqtt4homeassistant.components.sensor import Sensor
 from ha_services.mqtt4homeassistant.components.switch import Switch
 from ha_services.mqtt4homeassistant.data_classes import MqttSettings
@@ -105,6 +106,14 @@ def publish_forever(*, user_settings: DemoSettings, verbosity: int):
         unit_of_measurement='sec',
     )
 
+    select = Select(
+        device=device,
+        name='Select',
+        uid='select',
+        options=('Option 1', 'Option 2', 'Option 3'),
+        default_option='Option 1',
+    )
+
     def relay_callback(*, client: Client, component: Switch, old_state: str, new_state: str):
         logger.info(f'{component.name} state changed: {old_state!r} -> {new_state!r}')
         delay = random.randrange(5)
@@ -163,6 +172,7 @@ def publish_forever(*, user_settings: DemoSettings, verbosity: int):
         activate_relay.publish(mqttc)
 
         relay.publish(mqttc)
+        select.publish(mqttc)
 
         system_load_sensor.set_state(os.getloadavg()[0])
         system_load_sensor.publish(mqttc)
