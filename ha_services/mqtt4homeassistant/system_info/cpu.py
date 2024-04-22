@@ -12,7 +12,7 @@ class CpuFreqSensor(Sensor):
         kwargs.setdefault('uid', 'cpu_freq')
         kwargs.setdefault('device_class', 'frequency')
         kwargs.setdefault('state_class', 'measurement')
-        kwargs.setdefault('unit_of_measurement', 'Mhz')
+        kwargs.setdefault('unit_of_measurement', 'MHz')
         kwargs.setdefault('suggested_display_precision', 0)
         super().__init__(**kwargs)
 
