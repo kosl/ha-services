@@ -3,6 +3,7 @@ from unittest import TestCase
 
 import frozendict
 from bx_py_utils.test_utils.snapshot import assert_snapshot
+from freezegun.api import freeze_time
 
 from ha_services.mqtt4homeassistant.components.sensor import Sensor
 from ha_services.mqtt4homeassistant.data_classes import ComponentConfig, ComponentState
@@ -14,7 +15,11 @@ from ha_services.mqtt4homeassistant.mocks.mqtt_client_mock import MqttClientMock
 class IntergrationTestCase(TestCase):
 
     def test_main_sub(self):
-        with HostSystemMock(), self.assertLogs('ha_services', level='DEBUG'):
+        with (
+            HostSystemMock(),
+            freeze_time('2012-01-14 12:00:01', tz_offset=0, tick=True),
+            self.assertLogs('ha_services', level='DEBUG'),
+        ):
             main_device = MainMqttDevice(
                 name='Main Device',
                 uid='main_uid',
