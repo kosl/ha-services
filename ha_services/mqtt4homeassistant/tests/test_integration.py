@@ -106,7 +106,11 @@ class IntergrationTestCase(TestCase):
             payload = message['payload']
             self.assertIsInstance(payload, (int, float, str), message)
 
-            if topic.endswith('/state') and 'eth0' in topic:
-                message['payload'] = '<mocked eth0 values>'
+            if topic.endswith('/state'):
+                if 'eth0' in topic:
+                    message['payload'] = '<mocked eth0 values>'
+                elif 'up_time' in topic:
+                    assert payload.startswith('2009-02-14T00:'), f'{payload=}'
+                    message['payload'] = '2009-02-14T00:<mocked-ticks>'
 
         assert_snapshot(got=mqtt_client_mock.messages)
