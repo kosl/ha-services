@@ -12,7 +12,7 @@
         "topic": "homeassistant/sensor/main_uid/main_uid-up_time/config"
     },
     {
-        "payload": "2009-02-14T00:31:30+01:00",
+        "payload": "2009-02-14T00:<mocked-ticks>",
         "topic": "homeassistant/sensor/main_uid/main_uid-up_time/state"
     },
     {
