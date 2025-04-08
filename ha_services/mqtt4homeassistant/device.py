@@ -15,6 +15,7 @@ from ha_services.mqtt4homeassistant.system_info.memory import SwapUsageSensor
 from ha_services.mqtt4homeassistant.system_info.netstat import NetStatSensors
 from ha_services.mqtt4homeassistant.system_info.temperatures import TemperaturesSensors
 from ha_services.mqtt4homeassistant.system_info.up_time import StartTimeSensor, UpTimeSensor
+from ha_services.mqtt4homeassistant.system_info.wifi_info import WifiInfo2Mqtt
 from ha_services.mqtt4homeassistant.utilities.assertments import assert_uid
 
 
@@ -106,6 +107,8 @@ class MainMqttDevice(MqttDevice):
         self.temperatures_sensors = TemperaturesSensors(device=self)
         self.netstat_sensors = NetStatSensors(device=self)
 
+        self.wifi_info_sensors = WifiInfo2Mqtt(device=self)
+
     def poll_and_publish(self, client: Client) -> None:
         logger.debug(f'Polling {self.name} ({self.uid})')
 
@@ -123,3 +126,5 @@ class MainMqttDevice(MqttDevice):
 
         self.temperatures_sensors.publish(client)
         self.netstat_sensors.publish(client)
+
+        self.wifi_info_sensors.poll_and_publish(client)

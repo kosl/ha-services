@@ -68,7 +68,7 @@ st-snapshot-files,version}
 ```
 usage: ./cli.py [-h]
                 {edit-settings,print-settings,publish-loop,systemd-debug,systemd-remove,systemd-setup,systemd-status,s
-ystemd-stop,test-mqtt-connection,update-readme-history,version}
+ystemd-stop,test-mqtt-connection,update-readme-history,version,wifi-info}
 
 
 
@@ -77,7 +77,7 @@ ystemd-stop,test-mqtt-connection,update-readme-history,version}
 ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ╭─ subcommands ──────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ {edit-settings,print-settings,publish-loop,systemd-debug,systemd-remove,systemd-setup,systemd-status,systemd-stop, │
-│ test-mqtt-connection,update-readme-history,version}                                                                │
+│ test-mqtt-connection,update-readme-history,version,wifi-info}                                                      │
 │     edit-settings                                                                                                  │
 │                   Edit the settings file. On first call: Create the default one.                                   │
 │     print-settings                                                                                                 │
@@ -101,6 +101,7 @@ ystemd-stop,test-mqtt-connection,update-readme-history,version}
 │                   Also, callable via e.g.:                                                                         │
 │                       python -m cli_base update-readme-history -v                                                  │
 │     version       Print version and exit                                                                           │
+│     wifi-info     Just display the WiFi info                                                                       │
 ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 [comment]: <> (✂✂✂ auto generated main help end ✂✂✂)
@@ -117,6 +118,8 @@ New usage, see: `ha_services/example.py`
 
 [comment]: <> (✂✂✂ auto generated history start ✂✂✂)
 
+* [v2.9.0](https://github.com/jedie/ha-services/compare/v2.8.0...v2.9.0)
+  * 2025-04-08 - Add Wifi info into MainMqttDevice
 * [v2.8.0](https://github.com/jedie/ha-services/compare/v2.7.0...v2.8.0)
   * 2025-04-08 - Fix get_system_start_datetime()
   * 2025-04-08 - pip-tools -> uv
@@ -127,11 +130,11 @@ New usage, see: `ha_services/example.py`
 * [v2.6.0](https://github.com/jedie/ha-services/compare/v2.5.0...v2.6.0)
   * 2024-04-22 - fix tests using freezegun
   * 2024-04-22 - Add MQTT Select component for Home Assistant
-* [v2.5.0](https://github.com/jedie/ha-services/compare/v2.4.0...v2.5.0)
-  * 2024-03-27 - Skip config publising for a while and add more system sensors
 
 <details><summary>Expand older history entries ...</summary>
 
+* [v2.5.0](https://github.com/jedie/ha-services/compare/v2.4.0...v2.5.0)
+  * 2024-03-27 - Skip config publising for a while and add more system sensors
 * [v2.4.0](https://github.com/jedie/ha-services/compare/v2.3.0...v2.4.0)
   * 2024-03-26 - Enhance system sensors
 * [v2.3.0](https://github.com/jedie/ha-services/compare/v2.2.0...v2.3.0)
