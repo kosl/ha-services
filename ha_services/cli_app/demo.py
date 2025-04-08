@@ -1,10 +1,10 @@
 import logging
 
-import rich_click as click
-from cli_base.cli_tools.verbosity import OPTION_KWARGS_VERBOSE, setup_logging
+from cli_base.cli_tools.verbosity import setup_logging
+from cli_base.tyro_commands import TyroVerbosityArgType
 from rich import print  # noqa
 
-from ha_services.cli_app import cli
+from ha_services.cli_app import app
 from ha_services.cli_app.settings import get_user_settings
 from ha_services.example import DemoSettings, publish_forever
 from ha_services.mqtt4homeassistant.data_classes import MqttSettings
@@ -14,9 +14,8 @@ from ha_services.mqtt4homeassistant.mqtt import get_connected_client
 logger = logging.getLogger(__name__)
 
 
-@cli.command()
-@click.option('-v', '--verbosity', **OPTION_KWARGS_VERBOSE)
-def test_mqtt_connection(verbosity: int):
+@app.command
+def test_mqtt_connection(verbosity: TyroVerbosityArgType):
     """
     Test connection to MQTT Server
     """
@@ -31,9 +30,8 @@ def test_mqtt_connection(verbosity: int):
     print('\n[green]Test succeed[/green], bye ;)')
 
 
-@cli.command()
-@click.option('-v', '--verbosity', **OPTION_KWARGS_VERBOSE)
-def publish_loop(verbosity: int):
+@app.command
+def publish_loop(verbosity: TyroVerbosityArgType):
     """
     Publish data via MQTT for Home Assistant (endless loop)
     """

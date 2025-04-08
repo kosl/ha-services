@@ -17,7 +17,8 @@ def get_system_start_datetime() -> datetime.datetime:
 def process_start_datetime() -> datetime.datetime:
     p = psutil.Process(os.getpid())
     create_time: float = p.create_time()
-    start_dt = datetime.datetime.fromtimestamp(create_time, tz=datetime.timezone.utc)
+    tznow = datetime.datetime.now().astimezone()
+    start_dt = datetime.datetime.fromtimestamp(create_time, tz=tznow.tzinfo)
     return start_dt
 
 
@@ -36,6 +37,6 @@ def netstat() -> dict:
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
 
-    print(f'{get_system_start_datetime()=}')
-    print(f'{process_start_datetime()=}')
+    print(f'{get_system_start_datetime().isoformat()=}')
+    print(f'{process_start_datetime().isoformat()=}')
     print(f'{netstat()=}')
