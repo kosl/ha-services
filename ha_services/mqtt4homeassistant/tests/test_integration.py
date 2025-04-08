@@ -1,4 +1,5 @@
 import json
+import logging
 from unittest import TestCase
 
 import frozendict
@@ -6,7 +7,7 @@ from bx_py_utils.test_utils.snapshot import assert_snapshot
 from freezegun.api import freeze_time
 
 from ha_services.mqtt4homeassistant.components.sensor import Sensor
-from ha_services.mqtt4homeassistant.data_classes import ComponentConfig, ComponentState
+from ha_services.mqtt4homeassistant.data_classes import NO_STATE, ComponentConfig, ComponentState
 from ha_services.mqtt4homeassistant.device import MainMqttDevice, MqttDevice
 from ha_services.mqtt4homeassistant.mocks import HostSystemMock
 from ha_services.mqtt4homeassistant.mocks.mqtt_client_mock import MqttClientMock
@@ -16,12 +17,12 @@ class IntergrationTestCase(TestCase):
 
     def test_main_sub(self):
         with (
+            self.assertNoLogs(level=logging.WARNING),
             HostSystemMock(),
             freeze_time(
                 time_to_freeze='2012-01-14T12:00:00+00:00',
                 tick=True,  # Needed to avoid ZeroDivisionError in rate calculation
             ),
-            self.assertLogs('ha_services', level='DEBUG'),
         ):
             main_device = MainMqttDevice(
                 name='Main Device',
@@ -41,7 +42,7 @@ class IntergrationTestCase(TestCase):
                 test_sensor.get_state(),
                 ComponentState(
                     topic='homeassistant/sensor/main_uid-sub_uid/main_uid-sub_uid-sensor_uid/state',
-                    payload=None,
+                    payload=NO_STATE,  # No initial state -> NO_STATE
                 ),
             )
             test_sensor.set_state(123)

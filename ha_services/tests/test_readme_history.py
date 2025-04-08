@@ -1,3 +1,4 @@
+import logging
 from unittest import TestCase, skipIf
 
 from cli_base.cli_tools.constants import GITHUB_ACTION
@@ -12,4 +13,5 @@ class ReadmeHistoryTestCase(TestCase):
         reason='Skip on github actions',
     )
     def test_readme_history(self):
-        update_readme_history(raise_update_error=True)
+        with self.assertNoLogs(level=logging.WARNING):
+            update_readme_history(raise_update_error=True)

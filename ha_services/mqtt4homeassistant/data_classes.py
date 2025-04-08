@@ -12,7 +12,21 @@ from ha_services.mqtt4homeassistant.utilities.string_utils import slugify
 
 logger = logging.getLogger(__name__)
 
+
 StatePayload: TypeAlias = str | bytes | bytearray | int | float | None
+
+
+class NoState:
+    """
+    This is a special value that indicates that the state has not been set yet.
+    It is used to avoid publishing an empty state to Home Assistant.
+    """
+
+    def __repr__(self):
+        return '<NoState>'
+
+
+NO_STATE = NoState()
 
 
 @dataclasses.dataclass

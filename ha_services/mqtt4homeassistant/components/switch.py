@@ -1,10 +1,11 @@
 import logging
-from typing import Callable
+from collections.abc import Callable
 
 from paho.mqtt.client import MQTT_ERR_SUCCESS, Client, MQTTMessageInfo
 
+from ha_services.exceptions import InvalidStateValue
 from ha_services.mqtt4homeassistant.components import BaseComponent
-from ha_services.mqtt4homeassistant.data_classes import ComponentConfig, ComponentState
+from ha_services.mqtt4homeassistant.data_classes import NO_STATE, ComponentConfig, ComponentState
 from ha_services.mqtt4homeassistant.device import MqttDevice
 
 
@@ -34,8 +35,15 @@ class Switch(BaseComponent):
         uid: str,
         callback: Callable = default_switch_callback,
         component: str = 'switch',
+        initial_state=NO_STATE,  # set_state() must be called to set the value
     ):
-        super().__init__(device=device, name=name, uid=uid, component=component)
+        super().__init__(
+            device=device,
+            name=name,
+            uid=uid,
+            component=component,
+            initial_state=initial_state,
+        )
 
         self.callback = callback
 
@@ -43,8 +51,6 @@ class Switch(BaseComponent):
             self.ON: True,
             self.OFF: False,
         }
-        self.state = None
-
         self.command_topic = f'{self.topic_prefix}/command'
 
     def _command_callback(self, client: Client, userdata, message: MQTTMessageInfo):
@@ -63,9 +69,10 @@ class Switch(BaseComponent):
 
         return info
 
-    def set_state(self, state: str):
-        assert state in self.state2bool, f'Invalid state: {state}'
-        self.state = state
+    def validate_state(self, state: str):
+        super().validate_state(state)
+        if state not in self.state2bool:
+            raise InvalidStateValue(component=self, error_msg=f'{state=} not in {", ".join(self.state2bool.keys())}')
 
     def get_state(self) -> ComponentState:
         # e.g.: {'topic': 'homeassistant/switch/My-device/My-Relay/state', 'payload': 'ON'}

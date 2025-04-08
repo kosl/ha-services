@@ -3,8 +3,9 @@ from collections.abc import Callable
 
 from paho.mqtt.client import MQTT_ERR_SUCCESS, Client, MQTTMessageInfo
 
+from ha_services.exceptions import InvalidStateValue
 from ha_services.mqtt4homeassistant.components import BaseComponent
-from ha_services.mqtt4homeassistant.data_classes import ComponentConfig, ComponentState
+from ha_services.mqtt4homeassistant.data_classes import NO_STATE, ComponentConfig, ComponentState
 from ha_services.mqtt4homeassistant.device import MqttDevice
 
 
@@ -31,15 +32,21 @@ class Select(BaseComponent):
         uid: str,
         callback: Callable = default_select_callback,
         component: str = 'select',
+        initial_state=NO_STATE,  # set_state() must be called to set the value
         options: tuple[str, ...],
         default_option: str,
     ):
-        super().__init__(device=device, name=name, uid=uid, component=component)
+        super().__init__(
+            device=device,
+            name=name,
+            uid=uid,
+            component=component,
+            initial_state=initial_state,
+        )
 
         self.callback = callback
 
         self.options = options
-        self.state = None
         self.set_state(default_option)
 
         self.command_topic = f'{self.topic_prefix}/command'
@@ -60,9 +67,10 @@ class Select(BaseComponent):
 
         return info
 
-    def set_state(self, state: str):
-        assert state in self.options, f'Invalid state: {state!r} - Existing options: {self.options}'
-        self.state = state
+    def validate_state(self, state: str):
+        super().validate_state(state)
+        if state not in self.options:
+            raise InvalidStateValue(component=self, error_msg=f'{state=} not in {self.options=}')
 
     def get_state(self) -> ComponentState:
         # e.g.: {'topic': 'homeassistant/select/My-device/My-Relay/state', 'payload': 'ON'}

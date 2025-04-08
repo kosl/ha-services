@@ -95,14 +95,8 @@ class NetStatSensors:
 
     def __init__(self, device: 'MqttDevice'):
         self.device = device
-
         self.sensors = {}
-
         self.set_state()  # Add sensors
-
-        # Init diff values before first publishing:
-        time.sleep(0.1)
-        self.set_state()
 
     def set_state(self):
         data = netstat()

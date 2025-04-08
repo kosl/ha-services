@@ -1,7 +1,8 @@
 import logging
 
+from ha_services.exceptions import InvalidStateValue
 from ha_services.mqtt4homeassistant.components import BaseComponent
-from ha_services.mqtt4homeassistant.data_classes import ComponentConfig, ComponentState
+from ha_services.mqtt4homeassistant.data_classes import NO_STATE, ComponentConfig, ComponentState
 from ha_services.mqtt4homeassistant.device import MqttDevice
 
 
@@ -25,9 +26,16 @@ class BinarySensor(BaseComponent):
         name: str,
         uid: str,
         component: str = 'binary_sensor',
+        initial_state=NO_STATE,  # set_state() must be called to set the value
         device_class: str | None = None,  # https://www.home-assistant.io/integrations/binary_sensor/#device-class
     ):
-        super().__init__(device=device, name=name, uid=uid, component=component)
+        super().__init__(
+            device=device,
+            name=name,
+            uid=uid,
+            component=component,
+            initial_state=initial_state,
+        )
 
         self.device_class = device_class
 
@@ -35,16 +43,18 @@ class BinarySensor(BaseComponent):
             self.ON: True,
             self.OFF: False,
         }
-        self.state = None
 
     @property
-    def is_on(self) -> bool:
-        if self.state is not None:
-            return self.state2bool[self.state]
+    def is_on(self) -> bool | None:
+        if self.state is NO_STATE:
+            logger.warning('State not set, yet.')
+            return None
+        return self.state2bool[self.state]
 
-    def set_state(self, state: str):
-        assert state in self.state2bool, f'Invalid state: {state}'
-        self.state = state
+    def validate_state(self, state: str):
+        super().validate_state(state)
+        if state not in self.state2bool:
+            raise InvalidStateValue(component=self, error_msg=f'{state=} not in {self.state2bool.keys()}')
 
     def get_state(self) -> ComponentState:
         # e.g.: {'topic': 'homeassistant/switch/My-device/My-BinarySensor/state', 'payload': 'ON'}
