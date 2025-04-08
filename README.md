@@ -118,6 +118,7 @@ New usage, see: `ha_services/example.py`
 [comment]: <> (✂✂✂ auto generated history start ✂✂✂)
 
 * [v2.8.0](https://github.com/jedie/ha-services/compare/v2.7.0...v2.8.0)
+  * 2025-04-08 - Fix get_system_start_datetime()
   * 2025-04-08 - pip-tools -> uv
 * [v2.7.0](https://github.com/jedie/ha-services/compare/v2.6.0...v2.7.0)
   * 2024-09-20 - Apply manageprojects updates and replace safety with pip-audit

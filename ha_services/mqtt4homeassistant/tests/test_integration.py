@@ -17,7 +17,10 @@ class IntergrationTestCase(TestCase):
     def test_main_sub(self):
         with (
             HostSystemMock(),
-            freeze_time('2012-01-14T12:00:00+00:00', tz_offset=0, tick=True),
+            freeze_time(
+                time_to_freeze='2012-01-14T12:00:00+00:00',
+                tick=True,  # Needed to avoid ZeroDivisionError in rate calculation
+            ),
             self.assertLogs('ha_services', level='DEBUG'),
         ):
             main_device = MainMqttDevice(
@@ -110,7 +113,7 @@ class IntergrationTestCase(TestCase):
                 if 'eth0' in topic:
                     message['payload'] = '<mocked eth0 values>'
                 elif 'up_time' in topic:
-                    assert payload.startswith('2009-02-14T00:'), f'{payload=}'
-                    message['payload'] = '2009-02-14T00:<mocked-ticks>'
+                    assert payload.startswith('2009-02-13T23:'), f'{payload=}'
+                    message['payload'] = '2009-02-13T23:<mocked-ticks>'
 
         assert_snapshot(got=mqtt_client_mock.messages)

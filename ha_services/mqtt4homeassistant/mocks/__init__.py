@@ -1,3 +1,4 @@
+import datetime
 from unittest.mock import patch
 
 from bx_py_utils.test_utils.context_managers import MassContextManager
@@ -23,4 +24,7 @@ class HostSystemMock(MassContextManager):
             patch('ha_services.mqtt4homeassistant.system_info.memory.psutil', psutil_mock),
             patch('ha_services.mqtt4homeassistant.system_info.temperatures.psutil', psutil_mock),
             patch('ha_services.mqtt4homeassistant.utilities.system_utils.psutil', psutil_mock),
+            #
+            # https://github.com/spulec/freezegun/issues/472
+            patch("freezegun.api.tzlocal", lambda: datetime.UTC),
         )
