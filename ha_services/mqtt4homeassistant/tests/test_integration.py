@@ -17,7 +17,7 @@ class IntergrationTestCase(TestCase):
     def test_main_sub(self):
         with (
             HostSystemMock(),
-            freeze_time('2012-01-14 12:00:01', tz_offset=0, tick=True),
+            freeze_time('2012-01-14T12:00:00+00:00', tz_offset=0, tick=True),
             self.assertLogs('ha_services', level='DEBUG'),
         ):
             main_device = MainMqttDevice(
