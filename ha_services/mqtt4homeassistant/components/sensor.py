@@ -1,7 +1,8 @@
 import typing
 
+from ha_services.exceptions import InvalidStateValue
 from ha_services.mqtt4homeassistant.components import BaseComponent
-from ha_services.mqtt4homeassistant.data_classes import ComponentConfig, ComponentState, StatePayload
+from ha_services.mqtt4homeassistant.data_classes import NO_STATE, ComponentConfig, ComponentState
 
 
 if typing.TYPE_CHECKING:
@@ -21,6 +22,7 @@ class Sensor(BaseComponent):
         name: str,
         uid: str,
         component: str = 'sensor',
+        initial_state=NO_STATE,  # set_state() must be called to set the value
         #
         # https://www.home-assistant.io/integrations/sensor/#device-class
         device_class: str | None = None,  # e.g.: 'temperature'
@@ -29,24 +31,46 @@ class Sensor(BaseComponent):
         state_class: str | None = None,  # e.g.: 'measurement'
         unit_of_measurement: str | None = None,  # e.g.: '°C' / 'W' etc.
         suggested_display_precision: int | None = None,
+        #
+        # Optional min/max validation of int/float values:
+        min_value: int | float | None = None,
+        max_value: int | float | None = None,
     ):
-        super().__init__(device=device, name=name, uid=uid, component=component)
+        super().__init__(
+            device=device,
+            name=name,
+            uid=uid,
+            component=component,
+            initial_state=initial_state,
+        )
 
         self.device_class = device_class
         self.state_class = state_class
         self.unit_of_measurement = unit_of_measurement
         self.suggested_display_precision = suggested_display_precision
+        self.min_value = min_value
+        self.max_value = max_value
 
-        self.value = None  # set_state() must be called to set the value
+    def validate_state(self, state: str):
+        super().validate_state(state)
 
-    def set_state(self, state: StatePayload):
-        self.value = state
+        if self.min_value is not None:
+            if not isinstance(state, (int, float)):
+                raise InvalidStateValue(component=self, error_msg=f'{state=} is not a number')
+            if state < self.min_value:
+                raise InvalidStateValue(component=self, error_msg=f'{state=} is smaller than {self.min_value=}')
+
+        if self.max_value is not None:
+            if not isinstance(state, (int, float)):
+                raise InvalidStateValue(component=self, error_msg=f'{state=} is not a number')
+            if state > self.max_value:
+                raise InvalidStateValue(component=self, error_msg=f'{state=} is bigger than {self.max_value=}')
 
     def get_state(self) -> ComponentState:
         # e.g.: {'topic': 'homeassistant/sensor/My-device/Chip-Temperature/state', 'payload': '40'}
         return ComponentState(
             topic=f'{self.topic_prefix}/state',
-            payload=self.value,
+            payload=self.state,
         )
 
     def get_config(self) -> ComponentConfig:

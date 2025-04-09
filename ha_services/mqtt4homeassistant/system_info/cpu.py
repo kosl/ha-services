@@ -14,6 +14,8 @@ class CpuFreqSensor(Sensor):
         kwargs.setdefault('state_class', 'measurement')
         kwargs.setdefault('unit_of_measurement', 'MHz')
         kwargs.setdefault('suggested_display_precision', 0)
+        kwargs.setdefault('min_value', 1)  # Less than 1MHz ?
+        kwargs.setdefault('max_value', 20_000)  # More than 20.000MHz ?
         super().__init__(**kwargs)
 
     def publish_state(self, *args, **kwargs):
@@ -30,6 +32,7 @@ class SystemLoad1MinSensor(Sensor):
         kwargs.setdefault('uid', 'system_load_1min')
         kwargs.setdefault('state_class', 'measurement')
         kwargs.setdefault('suggested_display_precision', 2)
+        kwargs.setdefault('min_value', 0)
         super().__init__(**kwargs)
 
     def publish_state(self, *args, **kwargs):
@@ -45,6 +48,8 @@ class TotalCpuUsageSensor(Sensor):
         kwargs.setdefault('uid', 'total_cpu_usage')
         kwargs.setdefault('unit_of_measurement', '%')
         kwargs.setdefault('suggested_display_precision', 1)
+        kwargs.setdefault('min_value', 0)
+        kwargs.setdefault('max_value', 100)
         super().__init__(**kwargs)
 
     def publish_state(self, *args, **kwargs):
@@ -60,6 +65,8 @@ class ProcessCpuUsageSensor(Sensor):
         kwargs.setdefault('uid', 'process_cpu_usage')
         kwargs.setdefault('unit_of_measurement', '%')
         kwargs.setdefault('suggested_display_precision', 1)
+        kwargs.setdefault('min_value', 0)
+        kwargs.setdefault('max_value', 100)
         super().__init__(**kwargs)
 
         self.process = psutil.Process(os.getpid())

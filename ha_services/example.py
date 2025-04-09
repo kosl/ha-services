@@ -10,6 +10,7 @@ from paho.mqtt.client import Client
 from rich import print  # noqa
 
 import ha_services
+from ha_services.exceptions import InvalidStateValue
 from ha_services.mqtt4homeassistant.components.binary_sensor import BinarySensor
 from ha_services.mqtt4homeassistant.components.select import Select
 from ha_services.mqtt4homeassistant.components.sensor import Sensor
@@ -166,23 +167,26 @@ def publish_forever(*, user_settings: DemoSettings, verbosity: int):
     relay.set_state(relay.OFF if random.randrange(2) else relay.ON)
 
     while True:
-        main_device.poll_and_publish(mqttc)
+        try:
+            main_device.poll_and_publish(mqttc)
 
-        activate_relay.set_state(relay.OFF if random.randrange(2) else relay.ON)
-        activate_relay.publish(mqttc)
+            activate_relay.set_state(relay.OFF if random.randrange(2) else relay.ON)
+            activate_relay.publish(mqttc)
 
-        relay.publish(mqttc)
-        select.publish(mqttc)
+            relay.publish(mqttc)
+            select.publish(mqttc)
 
-        system_load_sensor.set_state(os.getloadavg()[0])
-        system_load_sensor.publish(mqttc)
+            system_load_sensor.set_state(os.getloadavg()[0])
+            system_load_sensor.publish(mqttc)
 
-        usage = resource.getrusage(resource.RUSAGE_SELF)
-        user_time_used_sensor.set_state(usage.ru_utime)
-        user_time_used_sensor.publish(mqttc)
+            usage = resource.getrusage(resource.RUSAGE_SELF)
+            user_time_used_sensor.set_state(usage.ru_utime)
+            user_time_used_sensor.publish(mqttc)
 
-        system_time_used_sensor.set_state(usage.ru_stime)
-        system_time_used_sensor.publish(mqttc)
+            system_time_used_sensor.set_state(usage.ru_stime)
+            system_time_used_sensor.publish(mqttc)
+        except InvalidStateValue as err:
+            logger.warning('Skip invalid state: %s', err)
 
         print('\n', flush=True)
         print('Wait', end='...')

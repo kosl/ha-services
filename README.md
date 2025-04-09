@@ -108,6 +108,12 @@ ystemd-stop,test-mqtt-connection,update-readme-history,version,wifi-info}
 
 
 # Backwards-incompatible changes
+## v2.10.0
+
+For new validation the main loop should catch `InvalidStateValue` exceptions,
+log it as warning and continue the loop.
+See `ha_services.example.publish_forever()` for an example ;)
+
 ## v2.0.0
 
 Complete refactor of `mqtt4homeassistant` module.
@@ -118,6 +124,8 @@ New usage, see: `ha_services/example.py`
 
 [comment]: <> (✂✂✂ auto generated history start ✂✂✂)
 
+* [v2.10.0](https://github.com/jedie/ha-services/compare/v2.9.0...v2.10.0)
+  * 2025-04-08 - Optional validation of sensor states
 * [v2.9.0](https://github.com/jedie/ha-services/compare/v2.8.0...v2.9.0)
   * 2025-04-08 - Add Wifi info into MainMqttDevice
 * [v2.8.0](https://github.com/jedie/ha-services/compare/v2.7.0...v2.8.0)
@@ -127,12 +135,12 @@ New usage, see: `ha_services/example.py`
   * 2024-09-20 - Apply manageprojects updates and replace safety with pip-audit
   * 2024-09-20 - Update requirements
   * 2024-04-22 - Bugfix: "Mhz" -> "MHz"
-* [v2.6.0](https://github.com/jedie/ha-services/compare/v2.5.0...v2.6.0)
-  * 2024-04-22 - fix tests using freezegun
-  * 2024-04-22 - Add MQTT Select component for Home Assistant
 
 <details><summary>Expand older history entries ...</summary>
 
+* [v2.6.0](https://github.com/jedie/ha-services/compare/v2.5.0...v2.6.0)
+  * 2024-04-22 - fix tests using freezegun
+  * 2024-04-22 - Add MQTT Select component for Home Assistant
 * [v2.5.0](https://github.com/jedie/ha-services/compare/v2.4.0...v2.5.0)
   * 2024-03-27 - Skip config publising for a while and add more system sensors
 * [v2.4.0](https://github.com/jedie/ha-services/compare/v2.3.0...v2.4.0)

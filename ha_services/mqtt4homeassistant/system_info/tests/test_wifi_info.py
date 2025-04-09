@@ -20,7 +20,7 @@ from ha_services.mqtt4homeassistant.system_info.wifi_info import (
 
 class WifiInfoTestCase(TestCase):
     def test_happy_path(self):
-        with HostSystemMock(), self.assertLogs(level=logging.DEBUG):
+        with HostSystemMock(), self.assertNoLogs(level=logging.WARNING):
             iwconfig_values = _get_iwconfig_values()
         self.assertEqual(
             iwconfig_values,
@@ -57,19 +57,20 @@ class WifiInfoTestCase(TestCase):
 
         ##########################################################################################
 
-        with HostSystemMock(), self.assertLogs(level=logging.DEBUG):
+        with HostSystemMock(), self.assertNoLogs(level=logging.WARNING):
             wifi_infos = get_wifi_infos()
         self.assertEqual(wifi_infos, WIFI_INFOS)
 
         ##########################################################################################
 
-        mqtt_client_mock = MqttClientMock()
-        wifi_info2mqtt = WifiInfo2Mqtt(
-            device=MqttDevice(name='Main Device', uid='main_uid'),
-        )
+        with self.assertNoLogs(level=logging.WARNING):
+            mqtt_client_mock = MqttClientMock()
+            wifi_info2mqtt = WifiInfo2Mqtt(
+                device=MqttDevice(name='Main Device', uid='main_uid'),
+            )
 
-        with patch.object(wifi_info, 'get_wifi_infos', return_value=WIFI_INFOS), self.assertLogs():
-            wifi_info2mqtt.poll_and_publish(client=mqtt_client_mock)
+            with patch.object(wifi_info, 'get_wifi_infos', return_value=WIFI_INFOS):
+                wifi_info2mqtt.poll_and_publish(client=mqtt_client_mock)
 
         # Some pre-checks:
         topics = [msg['topic'] for msg in mqtt_client_mock.messages]
