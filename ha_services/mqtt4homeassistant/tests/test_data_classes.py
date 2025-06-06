@@ -1,4 +1,5 @@
 import dataclasses
+import logging
 import socket
 from unittest import TestCase
 
@@ -8,7 +9,7 @@ from ha_services.mqtt4homeassistant.utilities.string_utils import slugify
 
 class DataClassesTestCase(TestCase):
     def test_mqtt_settings(self):
-        with self.assertLogs():
+        with self.assertNoLogs(level=logging.ERROR):
             mqtt_settings = MqttSettings()
         self.assertEqual(
             dataclasses.asdict(mqtt_settings),

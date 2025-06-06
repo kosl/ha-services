@@ -1,11 +1,11 @@
 import logging
 
-import rich_click as click
-from cli_base.cli_tools.verbosity import OPTION_KWARGS_VERBOSE, setup_logging
+from cli_base.cli_tools.verbosity import setup_logging
 from cli_base.systemd.api import ServiceControl
+from cli_base.tyro_commands import TyroVerbosityArgType
 from rich import print  # noqa
 
-from ha_services.cli_app import cli
+from ha_services.cli_app import app
 from ha_services.cli_app.settings import get_user_settings
 from ha_services.example import DemoSettings, SystemdServiceInfo
 
@@ -13,9 +13,8 @@ from ha_services.example import DemoSettings, SystemdServiceInfo
 logger = logging.getLogger(__name__)
 
 
-@cli.command()
-@click.option('-v', '--verbosity', **OPTION_KWARGS_VERBOSE)
-def systemd_debug(verbosity: int):
+@app.command
+def systemd_debug(verbosity: TyroVerbosityArgType):
     """
     Print Systemd service template + context + rendered file content.
     """
@@ -26,9 +25,8 @@ def systemd_debug(verbosity: int):
     ServiceControl(info=systemd_settings).debug_systemd_config()
 
 
-@cli.command()
-@click.option('-v', '--verbosity', **OPTION_KWARGS_VERBOSE)
-def systemd_setup(verbosity: int):
+@app.command
+def systemd_setup(verbosity: TyroVerbosityArgType):
     """
     Write Systemd service file, enable it and (re-)start the service. (May need sudo)
     """
@@ -39,9 +37,8 @@ def systemd_setup(verbosity: int):
     ServiceControl(info=systemd_settings).setup_and_restart_systemd_service()
 
 
-@cli.command()
-@click.option('-v', '--verbosity', **OPTION_KWARGS_VERBOSE)
-def systemd_remove(verbosity: int):
+@app.command
+def systemd_remove(verbosity: TyroVerbosityArgType):
     """
     Write Systemd service file, enable it and (re-)start the service. (May need sudo)
     """
@@ -52,9 +49,8 @@ def systemd_remove(verbosity: int):
     ServiceControl(info=systemd_settings).remove_systemd_service()
 
 
-@cli.command()
-@click.option('-v', '--verbosity', **OPTION_KWARGS_VERBOSE)
-def systemd_status(verbosity: int):
+@app.command
+def systemd_status(verbosity: TyroVerbosityArgType):
     """
     Display status of systemd service. (May need sudo)
     """
@@ -65,9 +61,8 @@ def systemd_status(verbosity: int):
     ServiceControl(info=systemd_settings).status()
 
 
-@cli.command()
-@click.option('-v', '--verbosity', **OPTION_KWARGS_VERBOSE)
-def systemd_stop(verbosity: int):
+@app.command
+def systemd_stop(verbosity: TyroVerbosityArgType):
     """
     Stops the systemd service. (May need sudo)
     """

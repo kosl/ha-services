@@ -3,7 +3,6 @@
     through `python -m ha_services`.
 """
 
-
 from ha_services.cli_app import main
 
 
